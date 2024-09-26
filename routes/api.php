@@ -15,6 +15,7 @@ use App\Http\Controllers\Organisation\ProcessDeposit;
 use App\Http\Controllers\Organisation\ProcessBankAccount;
 use App\Http\Controllers\Organisation\ProcessLoan;
 use App\Http\Controllers\Organisation\ProcessInvestment;
+use App\Http\Controllers\Organisation\ProcessBorrowings;
 
 // user end here
 
@@ -248,6 +249,19 @@ Route::group([
     Route::post('/Org/ProcessInvestment/CloseAccount',[ProcessInvestment::class,'process_close_account']);
 
     // Investment Route End Here
+
+    // Borrowings Route Start Here
+
+    Route::get('/Org/ProcessBorrowings/GetProdType',[ProcessBorrowings::class,'get_prod_type']);
+    Route::get('/Org/ProcessBorrowings/GetRepayMode',[ProcessBorrowings::class,'get_repay_mode']);
+    Route::get('/Org/ProcessBorrowings/GetLedger/{type}',[ProcessBorrowings::class,'get_ledger']);
+    Route::post('/Org/ProcessBorrowings/AddAccount',[ProcessBorrowings::class,'process_account']);
+    Route::get('/Org/ProcessBorrowings/GetAccountList/{org_id}',[ProcessBorrowings::class,'get_account_list']);
+    Route::post('/Org/ProcessBorrowings/GetAcctInfo',[ProcessBorrowings::class,'get_account_info']);
+    Route::post('/Org/ProcessBorrowings/Disburse',[ProcessBorrowings::class,'process_disburse']);
+    Route::post('/Org/ProcessBorrowings/Repayment',[ProcessBorrowings::class,'process_repayment']);
+
+    // Borrowings Route End Here
 });
 
 // user route end here
