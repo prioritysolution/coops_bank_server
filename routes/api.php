@@ -238,6 +238,14 @@ Route::group([
     Route::get('/Org/ProcessInvestment/GetInterestType',[ProcessInvestment::class,'get_interest_type']);
     Route::post('/Org/ProcessInvestment/CalMatureValue',[ProcessInvestment::class,'calculate_mature_val']);
     Route::get('/Org/ProcessInvestment/GetLedger/{mode}',[ProcessInvestment::class,'get_invest_ledger']);
+    Route::post('/Org/ProcessInvestment/AddAccount',[ProcessInvestment::class,'process_invest_account']);
+    Route::get('/Org/ProcessInvestment/AccountList/{org_id}/{type}',[ProcessInvestment::class,'get_account_list']);
+    Route::post('/Org/ProcessInvestment/InterestPost',[ProcessInvestment::class,'process_intt_posting']);
+    Route::post('/Org/ProcessInvestment/InstallmentPost',[ProcessInvestment::class,'processs_installment_post']);
+    Route::get('/Org/ProcessInvestment/GetInvestInfo/{org_id}/{invest_id}',[ProcessInvestment::class,'get_invest_info']);
+    Route::post('/Org/ProcessInvestment/ProcessRenewal',[ProcessInvestment::class,'process_renewal']);
+    Route::post('/Org/ProcessInvestment/CalInterest',[ProcessInvestment::class,'calculate_interest']);
+    Route::post('/Org/ProcessInvestment/CloseAccount',[ProcessInvestment::class,'process_close_account']);
 
     // Investment Route End Here
 });
