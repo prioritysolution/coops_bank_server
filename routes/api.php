@@ -194,6 +194,7 @@ Route::group([
     Route::post('/Org/ProcessDeposit/GetPayoutAccount',[ProcessDeposit::class,'get_payout_account']);
     Route::post('/Org/ProcessDeposit/ProcessBlkIntPayout',[ProcessDeposit::class,'process_blkintt_payout']);
     Route::post('/Org/ProcessDeposit/ProcessSingleInttPayout',[ProcessDeposit::class,'process_singintt_payout']);
+    Route::post('/Org/ProcessDeposit/GetBalance',[ProcessDeposit::class,'get_account_balance']);
 
     // Deposit Route End Here
 
@@ -215,6 +216,8 @@ Route::group([
     Route::post('/Org/ProcessLoan/DIsbShareDepBalance',[ProcessLoan::class,'get_dep_share_balance']);
     Route::post('/Org/ProcessLoan/GetDisbNeedAmount',[ProcessLoan::class,'get_disb_cal_amount']);
     Route::post('/Org/ProcessLoan/DisburseLoan',[ProcessLoan::class,'process_loan_disburse']);
+    Route::post('/Org/ProcessLoan/GetRepayData',[ProcessLoan::class,'get_repay_date']);
+    Route::post('/Org/ProcessLoan/PostRepay',[ProcessLoan::class,'process_loan_repayment']);
 
     // Loan Route End Here
 

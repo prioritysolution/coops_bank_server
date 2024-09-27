@@ -827,4 +827,157 @@ class ProcessLoan extends Controller
             throw new HttpResponseException($response);
     }   
     }
+
+    public function get_repay_date(Request $request){
+        $validator = Validator::make($request->all(),[
+            'org_id' => 'required',
+            'acct_no' => 'required',
+            'date' => 'required'
+        ]);
+        if($validator->passes()){
+        try {
+
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+            if(!$sql){
+              throw new Exception;
+            }
+            $org_schema = $sql[0]->db;
+            $db = Config::get('database.connections.mysql');
+            $db['database'] = $org_schema;
+            config()->set('database.connections.coops', $db);
+
+            $sql = DB::connection('coops')->select("Call USP_GET_LON_REPAY_DATA(?,?);",[$request->acct_no,$request->date]);
+
+            if(!$sql){
+                throw new Exception('No Data Found !!');
+            }
+
+            $error = $sql[0]->Err_No;
+            $message = $sql[0]->Message;
+
+            if($error<0){
+                return response()->json([
+                    'message' => 'Error Found',
+                    'details' => $message,
+                ],200);
+            }
+            else{
+                return response()->json([
+                    'message' => 'Data Found',
+                    'details' => $sql,
+                ],200);
+            }
+
+                
+            
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
+    else{
+        $errors = $validator->errors();
+
+            $response = response()->json([
+                'message' => 'Invalid data send',
+                'details' => $errors->messages(),
+            ],400);
+        
+            throw new HttpResponseException($response);
+    }  
+    }
+
+    public function process_loan_repayment(Request $request){
+        $validator = Validator::make($request->all(),[
+            'org_id' => 'required',
+            'acct_id' => 'required',
+            'mem_id' => 'required',
+            'date' => 'required',
+            'prn_amt' => 'required',
+            'intt_amt' => 'required',
+            'due_intt' => 'required',
+            'prn_gl' => 'required',
+            'intt_gl' => 'required',
+            'fin_id' => 'required',
+            'branch_Id' => 'required'
+        ]);
+        if($validator->passes()){
+        try {
+
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+            if(!$sql){
+              throw new Exception;
+            }
+            $org_schema = $sql[0]->db;
+            $db = Config::get('database.connections.mysql');
+            $db['database'] = $org_schema;
+            config()->set('database.connections.coops', $db);
+
+            DB::connection('coops')->beginTransaction();
+
+            $cash_drop_table = DB::connection('coops')->statement("Drop Temporary Table If Exists tempcashnote;");
+                $cash_create_table = DB::connection('coops')->statement("Create Temporary Table tempcashnote
+                                                    (
+                                                        Denom_Id			Int,
+                                                        Denom_In_Val		Int,
+                                                        Denom_Out_Val		Int,
+                                                        Denom_Amt			Numeric(18,2)
+                                                    );");
+                if(is_array($request->cash_details)){
+                    $cash_data = $this->convertToObject($request->cash_details);
+
+                    foreach ($cash_data as $denom_data) {
+                        $meter_insert =  DB::connection('coops')->statement("Insert Into tempcashnote (Denom_Id,Denom_In_Val,Denom_Out_Val,Denom_Amt) Values (?,?,?,?);",[$denom_data->note_id,$denom_data->in_qnty,$denom_data->out_qnty,$denom_data->tot_amount]);
+                    }
+                }
+
+            $sql = DB::connection('coops')->statement("Call USP_LOAN_POST_REPAY(?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->acct_id,$request->mem_id,$request->date,$request->prn_amt,$request->intt_amt,$request->due_intt,$request->prn_gl,$request->intt_gl,$request->bank_id,$request->sb_id,$request->fin_id,$request->branch_Id,auth()->user()->Id]);
+
+            if(!$sql){
+                throw new Exception('Operation Not Complete !!');
+            }
+            $result = DB::connection('coops')->select("Select @error As Error_No,@message As Message");
+            $error_No = $result[0]->Error_No;
+            $message = $result[0]->Message;
+
+            if($error_No<0){
+                DB::connection('coops')->rollBack();
+                return response()->json([
+                    'message' => 'Error Found',
+                    'details' => $message,
+                ],200);
+            }
+            else{
+                DB::connection('coops')->commit();
+                return response()->json([
+                    'message' => 'Success',
+                    'details' => $message,
+                ],200);
+            }
+   
+        } catch (Exception $ex) {
+            DB::connection('coops')->rollBack();
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
+    else{
+        $errors = $validator->errors();
+
+            $response = response()->json([
+                'message' => 'Invalid data send',
+                'details' => $errors->messages(),
+            ],400);
+        
+            throw new HttpResponseException($response);
+    } 
+    }
 }

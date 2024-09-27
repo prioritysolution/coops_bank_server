@@ -391,7 +391,23 @@ class ProcessBorrowings extends Controller
 
                 DB::connection('coops')->beginTransaction();
 
-                $sql = DB::connection('coops')->statement("Call USP_BORROW_ADD_REPAYMENT(?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->borrow_id,$request->disb_date,$request->prn_amt,$request->intt_amt,$request->bank_id,$request->prn_ledg,$request->intt_gl,$request->fin_id,$request->branch_id,auth()->user()->Id]);
+                $cash_drop_table = DB::connection('coops')->statement("Drop Temporary Table If Exists tempcashnote;");
+                $cash_create_table = DB::connection('coops')->statement("Create Temporary Table tempcashnote
+                                                    (
+                                                        Denom_Id			Int,
+                                                        Denom_In_Val		Int,
+                                                        Denom_Out_Val		Int,
+                                                        Denom_Amt			Numeric(18,2)
+                                                    );");
+                if(is_array($request->cash_details)){
+                    $cash_data = $this->convertToObject($request->cash_details);
+
+                    foreach ($cash_data as $denom_data) {
+                        $meter_insert =  DB::connection('coops')->statement("Insert Into tempcashnote (Denom_Id,Denom_In_Val,Denom_Out_Val,Denom_Amt) Values (?,?,?,?);",[$denom_data->note_id,$denom_data->in_qnty,$denom_data->out_qnty,$denom_data->tot_amount]);
+                    }
+                }
+
+                $sql = DB::connection('coops')->statement("Call USP_BORROW_ADD_REPAYMENT(?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->borrow_id,$request->disb_date,$request->prn_amt,$request->intt_amt,$request->bank_id,$request->prn_ledg,$request->intt_gl,$request->fin_id,$request->branch_id,auth()->user()->Id]);
 
 
                 if(!$sql){

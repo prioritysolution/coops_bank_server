@@ -1587,8 +1587,6 @@ class ProcessDeposit extends Controller
                         $meter_insert =  DB::connection('coops')->statement("Insert Into temp_payout_data (schd_id,Acct_Id,Ecs_Id,Amount) Values (?,?,?,?);",[$pay_details->sch_id,$pay_details->acct_id,$pay_details->ecs_id,$pay_details->amount]);
                     }
                 }
-                
-
 
                 $sql = DB::connection('coops')->statement("Call USP_DEP_POST_BLK_PAYOUT(?,?,?,?,@error,@message);",[$request->trans_date,$request->fin_id,$request->branch_id,auth()->user()->Id]);
 
@@ -1728,6 +1726,61 @@ class ProcessDeposit extends Controller
 
             } catch (Exception $ex) {
                 DB::connection('coops')->rollBack();
+                $response = response()->json([
+                    'message' => 'Error Found',
+                    'details' => $ex->getMessage(),
+                ],400);
+    
+                throw new HttpResponseException($response);
+            }
+        }
+        else{
+
+            $errors = $validator->errors();
+
+            $response = response()->json([
+                'message' => 'Invalid data send',
+                'details' => $errors->messages(),
+            ],400);
+        
+            throw new HttpResponseException($response);
+        }
+    }
+
+    public function get_account_balance(Request $request){
+        $validator = Validator::make($request->all(),[
+            'Acct_Id' => 'required',
+            'Date' => 'required',
+            'org_id' => 'required'
+        ]);
+
+        if($validator->passes()){
+
+            try {
+
+                $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+                if(!$sql){
+                  throw new Exception;
+                }
+                $org_schema = $sql[0]->db;
+                $db = Config::get('database.connections.mysql');
+                $db['database'] = $org_schema;
+                config()->set('database.connections.coops', $db);
+
+                $sql = DB::connection('coops')->select("Select UDF_GET_DEP_BALANCE(?,?) As Balance;",[$request->Acct_Id,$request->Date]);
+                
+                if(!$sql){
+                    throw new Exception("No Data Found");
+                }
+
+                    return response()->json([
+                        'message' => 'Data Found',
+                        'details' => $sql[0]->Balance,
+                    ],200);
+                
+
+            } catch (Exception $ex) {
+                
                 $response = response()->json([
                     'message' => 'Error Found',
                     'details' => $ex->getMessage(),
