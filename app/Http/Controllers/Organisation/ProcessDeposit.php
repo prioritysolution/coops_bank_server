@@ -1801,4 +1801,61 @@ class ProcessDeposit extends Controller
             throw new HttpResponseException($response);
         }
     }
+
+    public function process_ledger(Request $request){
+        $validator = Validator::make($request->all(),[
+            'Acct_Id' => 'required',
+            'form_date' => 'required',
+            'to_date' => 'required',
+            'mode' => 'required',
+            'org_id' => 'required'
+        ]);
+
+        if($validator->passes()){
+
+            try {
+
+                $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+                if(!$sql){
+                  throw new Exception;
+                }
+                $org_schema = $sql[0]->db;
+                $db = Config::get('database.connections.mysql');
+                $db['database'] = $org_schema;
+                config()->set('database.connections.coops', $db);
+
+                $sql = DB::connection('coops')->select("Call USP_RPT_GET_DEPOSIT_LEDGER(?,?,?,?);",[$request->Acct_Id,$request->form_date,$request->to_date,$request->mode]);
+                
+                if(!$sql){
+                    throw new Exception("No Data Found");
+                }
+
+                    return response()->json([
+                        'message' => 'Data Found',
+                        'details' => $sql,
+                    ],200);
+                
+
+            } catch (Exception $ex) {
+                
+                $response = response()->json([
+                    'message' => 'Error Found',
+                    'details' => $ex->getMessage(),
+                ],400);
+    
+                throw new HttpResponseException($response);
+            }
+        }
+        else{
+
+            $errors = $validator->errors();
+
+            $response = response()->json([
+                'message' => 'Invalid data send',
+                'details' => $errors->messages(),
+            ],400);
+        
+            throw new HttpResponseException($response);
+        }
+    }
 }

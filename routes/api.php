@@ -162,6 +162,8 @@ Route::group([
     Route::post('/Org/MemberShip/RefundShare',[ProcessMembership::class,'process_refund_share']);
     Route::post('/Org/MemberShip/WithdrwanMembership',[ProcessMembership::class,'process_withdrw_membership']);
 
+    Route::post('/Org/MemberShip/GetShareLedger',[ProcessMembership::class,'process_share_ledger']);
+
     // membership route end here
 
     // Deposit Route Start Here
@@ -195,6 +197,8 @@ Route::group([
     Route::post('/Org/ProcessDeposit/ProcessBlkIntPayout',[ProcessDeposit::class,'process_blkintt_payout']);
     Route::post('/Org/ProcessDeposit/ProcessSingleInttPayout',[ProcessDeposit::class,'process_singintt_payout']);
     Route::post('/Org/ProcessDeposit/GetBalance',[ProcessDeposit::class,'get_account_balance']);
+
+    Route::post('/Org/ProcessDeposit/GetLedger',[ProcessDeposit::class,'process_ledger']);
 
     // Deposit Route End Here
 
@@ -233,6 +237,8 @@ Route::group([
     Route::post('/Org/ProcessBankAccount/Transfer',[ProcessBankAccount::class,'process_bank_transfer']);
     Route::post('/Org/ProcessBankAccount/CloseAccount',[ProcessBankAccount::class,'process_close_account']);
 
+    Route::post('/Org/ProcessBankAccount/GetLedger',[ProcessBankAccount::class,'process_bank_ledger']);
+
     // Bank Route End Here
 
     // Investment Route Start Here
@@ -251,6 +257,8 @@ Route::group([
     Route::post('/Org/ProcessInvestment/CalInterest',[ProcessInvestment::class,'calculate_interest']);
     Route::post('/Org/ProcessInvestment/CloseAccount',[ProcessInvestment::class,'process_close_account']);
 
+    Route::post('/Org/ProcessInvestment/GetLedger',[ProcessInvestment::class,'process_ledger']);
+
     // Investment Route End Here
 
     // Borrowings Route Start Here
@@ -263,6 +271,8 @@ Route::group([
     Route::post('/Org/ProcessBorrowings/GetAcctInfo',[ProcessBorrowings::class,'get_account_info']);
     Route::post('/Org/ProcessBorrowings/Disburse',[ProcessBorrowings::class,'process_disburse']);
     Route::post('/Org/ProcessBorrowings/Repayment',[ProcessBorrowings::class,'process_repayment']);
+
+    Route::post('/Org/ProcessBorrowings/GetLedger',[ProcessBorrowings::class,'process_ledger']);
 
     // Borrowings Route End Here
 });
