@@ -93,7 +93,7 @@ class OrgRegister extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::commit();
@@ -285,7 +285,7 @@ class OrgRegister extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::commit();
@@ -370,7 +370,7 @@ class OrgRegister extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::commit();
@@ -431,7 +431,7 @@ class OrgRegister extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::commit();
@@ -519,7 +519,7 @@ class OrgRegister extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::commit();
@@ -570,7 +570,7 @@ class OrgRegister extends Controller
                 return response()->json([
                     'message' => 'Error Found',
                     'details' => 'Nothing To Be Found !!',
-                ],400);
+                ],200);
             }
             else{
                 return response()->json([
@@ -641,7 +641,7 @@ class OrgRegister extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::commit();
@@ -701,7 +701,7 @@ class OrgRegister extends Controller
                       return response()->json([
                           'message' => 'Error Found',
                           'details' => $message,
-                      ],400);
+                      ],200);
                   }
                   else{
                       DB::commit();
@@ -862,7 +862,7 @@ class OrgRegister extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => 'Type Name Cannot Be Matched !!',
-                    ],400); 
+                    ],200); 
                 }
                 
                 if(!$sql){
@@ -915,7 +915,7 @@ class OrgRegister extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $message,
-                    ],400);
+                    ],200);
 
                 }
                 else{
@@ -990,7 +990,7 @@ class OrgRegister extends Controller
                 return response()->json([
                     'message' => 'Error Found',
                     'details' => 'Organisation Dose Not Exists Deposit Module !!',
-                ],400);
+                ],200);
             }
             else{
                 return response()->json([
@@ -1129,7 +1129,7 @@ class OrgRegister extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $message,
-                    ],400);
+                    ],200);
 
                 }
                 else{
@@ -1196,7 +1196,7 @@ class OrgRegister extends Controller
                 return response()->json([
                     'message' => 'Error Found',
                     'details' => 'Type Name Cannot Be Empty !!',
-                ],400);
+                ],200);
             }
             else{
                 if($type_name=='Prn_Curr'){
@@ -1221,7 +1221,7 @@ class OrgRegister extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => 'Type Name Cannot Be Matched !!',
-                    ],400); 
+                    ],200); 
                 }
                 
                 if(!$sql){
@@ -1276,7 +1276,7 @@ class OrgRegister extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $message,
-                    ],400);
+                    ],200);
 
                 }
                 else{
@@ -1351,7 +1351,7 @@ class OrgRegister extends Controller
                 return response()->json([
                     'message' => 'Error Found',
                     'details' => 'Organisation Dose Not Exists Deposit Module !!',
-                ],400);
+                ],200);
             }
             else{
                 return response()->json([
@@ -1538,7 +1538,7 @@ class OrgRegister extends Controller
                        return response()->json([
                            'message' => 'Error Found',
                            'details' => $message,
-                       ],400);
+                       ],200);
    
                    }
                    else{
@@ -1601,7 +1601,7 @@ class OrgRegister extends Controller
                        return response()->json([
                            'message' => 'Error Found',
                            'details' => $message,
-                       ],400);
+                       ],200);
    
                    }
                    else{
@@ -1694,7 +1694,7 @@ class OrgRegister extends Controller
                 return response()->json([
                     'message' => 'Error Found',
                     'details' => 'Type Name Cannot Be Empty !!',
-                ],400);
+                ],200);
             }
             else{
                 if($type_name=='Adm'){
@@ -1710,7 +1710,7 @@ class OrgRegister extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => 'Type Name Cannot Be Matched !!',
-                    ],400); 
+                    ],200); 
                 }
                 
                 if(!$sql){
@@ -1761,7 +1761,7 @@ class OrgRegister extends Controller
                        return response()->json([
                            'message' => 'Error Found',
                            'details' => $message,
-                       ],400);
+                       ],200);
    
                    }
                    else{

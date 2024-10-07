@@ -121,7 +121,7 @@ class ProcessBankAccount extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
@@ -177,9 +177,6 @@ class ProcessBankAccount extends Controller
                     'message' => 'Data Found',
                     'details' => $sql,
                 ],200);
-            
-
-            
 
         } catch (Exception $ex) {
             $response = response()->json([
@@ -303,7 +300,7 @@ class ProcessBankAccount extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
@@ -391,7 +388,7 @@ class ProcessBankAccount extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
@@ -450,7 +447,6 @@ class ProcessBankAccount extends Controller
                 config()->set('database.connections.coops', $db);
                 DB::connection('coops')->beginTransaction();
 
-               
 
                 $sql = DB::connection('coops')->statement("Call USP_ADD_BANK_TRANS(?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->Account_Id,3,$request->Amount,$request->to_account_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
 
@@ -466,7 +462,7 @@ class ProcessBankAccount extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
@@ -554,7 +550,7 @@ class ProcessBankAccount extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();

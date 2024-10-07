@@ -274,7 +274,7 @@ class ProcessDeposit extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     return response()->json([
@@ -569,7 +569,7 @@ class ProcessDeposit extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $error_message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
@@ -754,7 +754,7 @@ class ProcessDeposit extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $error_message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
@@ -847,7 +847,7 @@ class ProcessDeposit extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $error_message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();

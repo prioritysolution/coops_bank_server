@@ -38,7 +38,7 @@ class AdminLogin extends Controller
                     $response = response()->json([
                         'message' => 'Error Found',
                         'details' => $db_message,
-                    ],400);
+                    ],200);
         
                     return $response;
                 }
@@ -56,7 +56,7 @@ class AdminLogin extends Controller
                         $response = response()->json([
                             'message' => 'Error Found',
                             'details' => 'Invalid Password'
-                        ],400);
+                        ],200);
                     
                         return $response;
                     }
@@ -167,7 +167,7 @@ class AdminLogin extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::commit();
@@ -223,7 +223,7 @@ class AdminLogin extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::commit();
@@ -326,7 +326,7 @@ class AdminLogin extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::commit();

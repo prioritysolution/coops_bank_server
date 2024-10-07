@@ -48,7 +48,7 @@ class UserLogin extends Controller
                     $response = response()->json([
                         'message' => 'Error Found',
                         'details' => $message,
-                    ],400);
+                    ],200);
         
                     return $response;
                 }
@@ -72,10 +72,11 @@ class UserLogin extends Controller
                         ],200);
                     }
                     else{
+                        DB::rollBack();
                         $response = response()->json([
                             'message' => 'Error Found',
                             'details' => 'Invalid Password'
-                        ],400);
+                        ],200);
                     
                         return $response;
                     }
@@ -172,7 +173,7 @@ class UserLogin extends Controller
                 return response()->json([
                     'message' => 'Error Found',
                     'details' => $message,
-                ],400);
+                ],200);
             }
             else{
                 DB::commit();

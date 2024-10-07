@@ -163,6 +163,7 @@ Route::group([
     Route::post('/Org/MemberShip/WithdrwanMembership',[ProcessMembership::class,'process_withdrw_membership']);
 
     Route::post('/Org/MemberShip/GetShareLedger',[ProcessMembership::class,'process_share_ledger']);
+    Route::post('/Org/MemberShip/GetMemberInfo',[ProcessMembership::class,'process_member_info']);
 
     // membership route end here
 
