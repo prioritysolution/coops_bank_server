@@ -3,9 +3,11 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 // admin controller maping
+
 use App\Http\Controllers\Admin\AdminLogin;
 use App\Http\Controllers\Admin\OrgRegister;
-// admin end here
+
+// admin Controller end here
 
 // user controller mapping
 use App\Http\Controllers\Organisation\UserLogin;
@@ -16,8 +18,8 @@ use App\Http\Controllers\Organisation\ProcessBankAccount;
 use App\Http\Controllers\Organisation\ProcessLoan;
 use App\Http\Controllers\Organisation\ProcessInvestment;
 use App\Http\Controllers\Organisation\ProcessBorrowings;
-
-// user end here
+use App\Http\Controllers\Organisation\ProcessOpening;
+// user Controller end here
 
 /*
 |--------------------------------------------------------------------------
@@ -276,6 +278,12 @@ Route::group([
     Route::post('/Org/ProcessBorrowings/GetLedger',[ProcessBorrowings::class,'process_ledger']);
 
     // Borrowings Route End Here
+
+    // Openoing Entry Route Start Here
+
+    Route::post('/Org/ProcessOpening/Membership',[ProcessOpening::class,'process_opn_membership']);
+
+    // Opening Entry Route End Here
 });
 
 // user route end here
