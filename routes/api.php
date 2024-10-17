@@ -226,6 +226,8 @@ Route::group([
     Route::post('/Org/ProcessLoan/GetRepayData',[ProcessLoan::class,'get_repay_date']);
     Route::post('/Org/ProcessLoan/PostRepay',[ProcessLoan::class,'process_loan_repayment']);
 
+    Route::post('/Org/ProcessLoan/GetLedger',[ProcessLoan::class,'process_ledger']);
+
     // Loan Route End Here
 
     // Bank Route Start Here
@@ -282,6 +284,11 @@ Route::group([
     // Openoing Entry Route Start Here
 
     Route::post('/Org/ProcessOpening/Membership',[ProcessOpening::class,'process_opn_membership']);
+    Route::post('/Org/ProcessOpening/DepositAccount',[ProcessOpening::class,'process_deposit_account']);
+    Route::post('/Org/ProcessOpening/Investment',[ProcessOpening::class,'process_investment']);
+    Route::post('/Org/ProcessOpening/BankAccount',[ProcessOpening::class,'process_bank_acct']);
+    Route::post('/Org/ProcessOpening/BankBorrowings',[ProcessOpening::class,'process_borrowings']);
+    Route::post('/Org/ProcessOpening/LoanAccount',[ProcessOpening::class,'process_member_loan']);
 
     // Opening Entry Route End Here
 });
