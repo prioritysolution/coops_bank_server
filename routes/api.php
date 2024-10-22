@@ -289,6 +289,11 @@ Route::group([
     Route::post('/Org/ProcessOpening/BankAccount',[ProcessOpening::class,'process_bank_acct']);
     Route::post('/Org/ProcessOpening/BankBorrowings',[ProcessOpening::class,'process_borrowings']);
     Route::post('/Org/ProcessOpening/LoanAccount',[ProcessOpening::class,'process_member_loan']);
+    Route::get('/Org/ProcessOpening/GetAcctMainHead',[ProcessOpening::class,'get_acct_main_head']);
+    Route::get('/Org/ProcessOpening/GetSubHead/{head_id}',[ProcessOpening::class,'get_acct_sub_head']);
+    Route::get('/Org/ProcessOpening/GetLedger/{sub_id}',[ProcessOpening::class,'get_acct_ledger']);
+    Route::post('/Org/ProcessOpening/AddAcctBalance',[ProcessOpening::class,'process_acct_opn_balance']);
+    Route::get('/Org/ProcessOpening/GetBranchList/{org_id}',[ProcessOpening::class,'get_org_branch_list']);
 
     // Opening Entry Route End Here
 });

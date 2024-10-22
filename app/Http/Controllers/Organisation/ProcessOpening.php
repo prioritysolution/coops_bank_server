@@ -470,4 +470,170 @@ class ProcessOpening extends Controller
             throw new HttpResponseException($response);
     } 
     }
+
+    public function get_acct_main_head(){
+        try {
+
+            $sql = DB::select("Select Id,Head_Name From mst_org_accounts_head Where Is_Active=?;",[1]);
+
+            if(!$sql){
+                throw new Exception('No Data Found !!');
+            }
+           
+            return response()->json([
+                'message' => 'Data Found',
+                'details' => $sql,
+            ],200);
+        
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
+
+    public function get_acct_sub_head(Int $head_id){
+        try {
+
+            $sql = DB::select("Select Id,Sub_Head_Name From mst_org_acct_sub_head Where Is_Active=? And Head_Id=?;",[1,$head_id]);
+
+            if(!$sql){
+                throw new Exception('No Data Found !!');
+            }
+           
+            return response()->json([
+                'message' => 'Data Found',
+                'details' => $sql,
+            ],200);
+        
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
+    
+    public function get_acct_ledger(Int $sub_id){
+        try {
+
+            $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=? And Sub_Head=?;",[1,$sub_id]);
+
+            if(!$sql){
+                throw new Exception('No Data Found !!');
+            }
+           
+            return response()->json([
+                'message' => 'Data Found',
+                'details' => $sql,
+            ],200);
+        
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
+
+    public function process_acct_opn_balance(Request $request){
+        $validator = Validator::make($request->all(),[
+            'org_id' => 'required',
+            'open_date' => 'required',
+            'acct_id' => 'required',
+            'open_balance' => 'required',
+            'branch_Id' => 'required'
+        ]);
+        if($validator->passes()){
+        try {
+
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+            if(!$sql){
+              throw new Exception;
+            }
+            $org_schema = $sql[0]->db;
+            $db = Config::get('database.connections.mysql');
+            $db['database'] = $org_schema;
+            config()->set('database.connections.coops', $db);
+            DB::connection('coops')->beginTransaction();
+            $sql = DB::connection('coops')->statement("Call USP_PUSH_OPN_LEDGER_BAL(?,?,?,?,?,@error,@message);",[$request->open_date,$request->acct_id,$request->open_balance,$request->branch_Id,auth()->user()->Id]);
+
+            if(!$sql){
+                throw new Exception('Operation Error Found !!');
+            }
+            $result = DB::connection('coops')->select("Select @error As Error_No,@message As Message;");
+            $error_No = $result[0]->Error_No;
+            $message = $result[0]->Message;
+
+            if($error_No<0){
+                DB::connection('coops')->rollBack();
+                return response()->json([
+                    'message' => 'Error Found',
+                    'details' => $message,
+                ],200);
+            }
+            else{
+                DB::connection('coops')->commit();
+                return response()->json([
+                    'message' => 'Success',
+                    'details' => $message,
+                ],200);
+            }
+            
+        } catch (Exception $ex) {
+            DB::connection('coops')->rollBack();
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
+    else{
+        $errors = $validator->errors();
+
+            $response = response()->json([
+                'message' => 'Invalid data send',
+                'details' => $errors->messages(),
+            ],400);
+        
+            throw new HttpResponseException($response);
+    } 
+    }
+
+    public function get_org_branch_list(Int $org_id){
+        try {
+
+            $sql = DB::select("Select Id,Branch_Name From map_org_branch Where Is_Active=? And Org_Id=?;",[1,$org_id]);
+
+            if(!$sql){
+                throw new Exception('No Data Found !!');
+            }
+           
+            return response()->json([
+                'message' => 'Data Found',
+                'details' => $sql,
+            ],200);
+        
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
 }
