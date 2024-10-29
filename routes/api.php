@@ -19,6 +19,7 @@ use App\Http\Controllers\Organisation\ProcessLoan;
 use App\Http\Controllers\Organisation\ProcessInvestment;
 use App\Http\Controllers\Organisation\ProcessBorrowings;
 use App\Http\Controllers\Organisation\ProcessOpening;
+use App\Http\Controllers\Organisation\ProcessFinancialReport;
 // user Controller end here
 
 /*
@@ -106,6 +107,7 @@ Route::group([
 
     Route::get('/Org/GetFinancialYear/{org_id}',[UserLogin::class,'get_current_financial_year']);
     Route::get('/Org/GetUserDashboard/{org_id}',[UserLogin::class,'get_dashboard']);
+    Route::post('/Org/GetDashboardItem',[UserLogin::class,'get_dashboard_item']);
     Route::post('/Org/User/ProcessLogOut',[UserLogin::class,'process_logout']);
 
     // login route end here
@@ -293,9 +295,20 @@ Route::group([
     Route::get('/Org/ProcessOpening/GetSubHead/{head_id}',[ProcessOpening::class,'get_acct_sub_head']);
     Route::get('/Org/ProcessOpening/GetLedger/{sub_id}',[ProcessOpening::class,'get_acct_ledger']);
     Route::post('/Org/ProcessOpening/AddAcctBalance',[ProcessOpening::class,'process_acct_opn_balance']);
-    Route::get('/Org/ProcessOpening/GetBranchList/{org_id}',[ProcessOpening::class,'get_org_branch_list']);
+    Route::get('/Org/ProcessOpening/GetBranchList/{org_id}/{branch_id}',[ProcessOpening::class,'get_org_branch_list']);
 
     // Opening Entry Route End Here
+
+    // Financial Report Route Start Here
+    
+    Route::post('/Org/FinancialReporting/Glbalancing',[ProcessFinancialReport::class,'process_gl_balancing']);
+    Route::post('/Org/FinancialReporting/GetDayBook',[ProcessFinancialReport::class,'process_daybook']);
+    Route::post('/Org/FinancialReporting/GetCashBalance',[ProcessFinancialReport::class,'process_cash_balance']);
+    Route::post('/Org/FinancialReporting/GetCashAcct',[ProcessFinancialReport::class,'process_cash_acct']);
+    Route::post('/Org/FinancialReporting/GetCashBook',[ProcessFinancialReport::class,'process_cash_book']);
+    Route::get('/Org/FinancialReporting/GetAcctLedger',[ProcessFinancialReport::class,'get_acct_ledger']);
+
+    // Financial Report Route End Here
 });
 
 // user route end here

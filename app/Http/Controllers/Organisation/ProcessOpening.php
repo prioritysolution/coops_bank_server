@@ -612,10 +612,10 @@ class ProcessOpening extends Controller
     } 
     }
 
-    public function get_org_branch_list(Int $org_id){
+    public function get_org_branch_list(Int $org_id,Int $branch_id){
         try {
 
-            $sql = DB::select("Select Id,Branch_Name From map_org_branch Where Is_Active=? And Org_Id=?;",[1,$org_id]);
+            $sql = DB::select("Call USP_GET_ORG_BRANCH(?,?);",[$org_id,$branch_id]);
 
             if(!$sql){
                 throw new Exception('No Data Found !!');

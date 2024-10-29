@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Organisation;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Config;
 use App\Models\OrgUser;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Hash;
@@ -132,25 +133,40 @@ class UserLogin extends Controller
 
     public function get_dashboard(Int $org_id){
         try {
-            $module = DB::select("Call USP_GET_ORG_USER_DASHBOARD(?,?,?,?,?);",[$org_id,auth()->user()->Id,null,null,1]);
-            $menue_set = [];
-
-            foreach ($module as $module_key) {
-                $sub_m = DB::select("Call USP_GET_ORG_USER_DASHBOARD(?,?,?,?,?);",[$org_id,auth()->user()->Id,$module_key->Id,$module_key->Module_Id,2]);
-                $menue_set [] = ["title"=>$module_key->Sub_Mod_Name,"Icon"=>$module_key->Icon,"path"=>$module_key->Page_Alies,"childLinks"=>$sub_m];
+            $result = DB::select("CALL USP_GET_ORG_USER_DASHBOARD(?, ?);", [$org_id, auth()->user()->Id]);
+            
+            $menu_set = [];
+            
+            foreach ($result as $row) {
+                if (!isset($menu_set[$row->Module_Id])) {
+                    $menu_set[$row->Module_Id] = [
+                        "title" => $row->Sub_Mod_Name,
+                        "Icon" => $row->Icon,
+                        "path" => $row->Page_Alies,
+                        "childLinks" => []
+                    ];
+                }
+                if ($row->Menue_Name) {
+                    $menu_set[$row->Module_Id]['childLinks'][] = [
+                        "Menue_Name" => $row->Menue_Name,
+                        "Icon" => $row->Menu_Icon,
+                        "Page_Allies" => $row->Page_Allies
+                    ];
+                }
             }
-            return response()->json([
-                'message' =>'Data Found',
-                'Data' => $menue_set
-            ],200);
-
-        } catch (Exception $ex) {
-           $response = response()->json([
-                    'message' => 'Error Found',
-                    'details' => $ex->getMessage(),
-                ],400);
     
-                throw new HttpResponseException($response);
+            $menu_set = array_values($menu_set);
+    
+            return response()->json([
+                'message' => 'Data Found',
+                'Data' => $menu_set
+            ], 200);
+    
+        } catch (Exception $ex) {
+            return response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ], 400);
         }
     }
 
@@ -192,6 +208,55 @@ class UserLogin extends Controller
                 ],400);
     
                 throw new HttpResponseException($response);
+        }
+    }
+
+    public function get_dashboard_item(Request $request){
+        $validator = Validator::make($request->all(),[
+            'org_id' =>'required',
+            'branch_id' =>'required',
+            'date' => 'required',
+        ]);
+        if($validator->passes()){
+            try {
+            
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+            if(!$sql){
+                throw new Exception;
+            }
+            $org_schema = $sql[0]->db;
+            $db = Config::get('database.connections.mysql');
+            $db['database'] = $org_schema;
+            config()->set('database.connections.coops', $db);
+            $sql = DB::connection('coops')->select("Call USP_GET_DASHBOARD_ITEM(?,?);",[$request->branch_id,$request->date]);
+
+            if(!$sql){
+                throw new Exception('No Data Found !!');
+            }
+
+            return response()->json([
+                'message' => 'Data Found',
+                'details' => $sql,
+            ],200);
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+        }
+        else{
+            $errors = $validator->errors();
+
+        $response = response()->json([
+        'message' => 'Invalid data send',
+        'details' => $errors->messages(),
+    ],400);
+
+    throw new HttpResponseException($response);
         }
     }
 } 
