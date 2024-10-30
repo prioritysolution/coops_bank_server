@@ -307,6 +307,9 @@ Route::group([
     Route::post('/Org/FinancialReporting/GetCashAcct',[ProcessFinancialReport::class,'process_cash_acct']);
     Route::post('/Org/FinancialReporting/GetCashBook',[ProcessFinancialReport::class,'process_cash_book']);
     Route::get('/Org/FinancialReporting/GetAcctLedger',[ProcessFinancialReport::class,'get_acct_ledger']);
+    Route::post('/Org/FinancialReporting/GenereateAcctLedger',[ProcessFinancialReport::class,'genereate_ledger']);
+    Route::post('/Org/FinancialReporting/GetVoucherList',[ProcessFinancialReport::class,'get_voucher_list']);
+    Route::get('/Org/FinancialReporting/GetVoucherDetails/{org_id}/{txn_id}',[ProcessFinancialReport::class,'get_voucher_details']);
 
     // Financial Report Route End Here
 });
