@@ -20,6 +20,7 @@ use App\Http\Controllers\Organisation\ProcessInvestment;
 use App\Http\Controllers\Organisation\ProcessBorrowings;
 use App\Http\Controllers\Organisation\ProcessOpening;
 use App\Http\Controllers\Organisation\ProcessFinancialReport;
+use App\Http\Controllers\Organisation\ProcessModuleReport;
 // user Controller end here
 
 /*
@@ -32,10 +33,6 @@ use App\Http\Controllers\Organisation\ProcessFinancialReport;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
 
 // admin login route
 
@@ -312,6 +309,17 @@ Route::group([
     Route::get('/Org/FinancialReporting/GetVoucherDetails/{org_id}/{txn_id}',[ProcessFinancialReport::class,'get_voucher_details']);
 
     // Financial Report Route End Here
+
+    // Modulewise Report Route Start Here
+
+    Route::get('/Org/ProcessModuleReport/Membership/GetReportType',[ProcessModuleReport::class,'get_mem_report_type']);
+    Route::post('/Org/ProcessModuleReport/Membership/MemberRegister',[ProcessModuleReport::class,'process_member_register']);
+    Route::post('/Org/ProcessModuleReport/Membership/TransRegister',[ProcessModuleReport::class,'process_member_trans_register']);
+    Route::post('/Org/ProcessModuleReport/Membership/WithdrwanRegister',[ProcessModuleReport::class,'process_member_withdrw_register']);
+    Route::post('/Org/ProcessModuleReport/Membership/GetDetailedList',[ProcessModuleReport::class,'process_member_detailedlist']);
+    Route::post('/Org/ProcessModuleReport/Membership/GetDividendList',[ProcessModuleReport::class,'process_member_dividendlist']);
+
+    // Modulewise Route End Here
 });
 
 // user route end here

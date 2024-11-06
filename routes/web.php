@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 */
 // Route::redirect('/login', '/', 301);
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
 

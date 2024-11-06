@@ -8936,3 +8936,31 @@ Did you mean one of these?
 #38 /var/www/html/laravel/CoopsBank/public/index.php(52): Illuminate\\Foundation\\Http\\Kernel->handle()
 #39 {main}
 "} 
+[2024-11-06 11:07:51] local.ERROR: No arguments expected for "env:decrypt" command, got "7wusllHbpqwDi2SwHv1nSFzVtperfBeWGRa6HtkQVO4=". {"exception":"[object] (Symfony\\Component\\Console\\Exception\\RuntimeException(code: 0): No arguments expected for \"env:decrypt\" command, got \"7wusllHbpqwDi2SwHv1nSFzVtperfBeWGRa6HtkQVO4=\". at /var/www/html/laravel/CoopsBank/vendor/symfony/console/Input/ArgvInput.php:196)
+[stacktrace]
+#0 /var/www/html/laravel/CoopsBank/vendor/symfony/console/Input/ArgvInput.php(89): Symfony\\Component\\Console\\Input\\ArgvInput->parseArgument()
+#1 /var/www/html/laravel/CoopsBank/vendor/symfony/console/Input/ArgvInput.php(74): Symfony\\Component\\Console\\Input\\ArgvInput->parseToken()
+#2 /var/www/html/laravel/CoopsBank/vendor/symfony/console/Input/Input.php(56): Symfony\\Component\\Console\\Input\\ArgvInput->parse()
+#3 /var/www/html/laravel/CoopsBank/vendor/symfony/console/Command/Command.php(285): Symfony\\Component\\Console\\Input\\Input->bind()
+#4 /var/www/html/laravel/CoopsBank/vendor/laravel/framework/src/Illuminate/Console/Command.php(181): Symfony\\Component\\Console\\Command\\Command->run()
+#5 /var/www/html/laravel/CoopsBank/vendor/symfony/console/Application.php(1078): Illuminate\\Console\\Command->run()
+#6 /var/www/html/laravel/CoopsBank/vendor/symfony/console/Application.php(324): Symfony\\Component\\Console\\Application->doRunCommand()
+#7 /var/www/html/laravel/CoopsBank/vendor/symfony/console/Application.php(175): Symfony\\Component\\Console\\Application->doRun()
+#8 /var/www/html/laravel/CoopsBank/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(201): Symfony\\Component\\Console\\Application->run()
+#9 /var/www/html/laravel/CoopsBank/artisan(37): Illuminate\\Foundation\\Console\\Kernel->handle()
+#10 {main}
+"} 
+[2024-11-06 11:08:14] local.ERROR: No arguments expected for "env:decrypt" command, got "key=7wusllHbpqwDi2SwHv1nSFzVtperfBeWGRa6HtkQVO4=". {"exception":"[object] (Symfony\\Component\\Console\\Exception\\RuntimeException(code: 0): No arguments expected for \"env:decrypt\" command, got \"key=7wusllHbpqwDi2SwHv1nSFzVtperfBeWGRa6HtkQVO4=\". at /var/www/html/laravel/CoopsBank/vendor/symfony/console/Input/ArgvInput.php:196)
+[stacktrace]
+#0 /var/www/html/laravel/CoopsBank/vendor/symfony/console/Input/ArgvInput.php(89): Symfony\\Component\\Console\\Input\\ArgvInput->parseArgument()
+#1 /var/www/html/laravel/CoopsBank/vendor/symfony/console/Input/ArgvInput.php(74): Symfony\\Component\\Console\\Input\\ArgvInput->parseToken()
+#2 /var/www/html/laravel/CoopsBank/vendor/symfony/console/Input/Input.php(56): Symfony\\Component\\Console\\Input\\ArgvInput->parse()
+#3 /var/www/html/laravel/CoopsBank/vendor/symfony/console/Command/Command.php(285): Symfony\\Component\\Console\\Input\\Input->bind()
+#4 /var/www/html/laravel/CoopsBank/vendor/laravel/framework/src/Illuminate/Console/Command.php(181): Symfony\\Component\\Console\\Command\\Command->run()
+#5 /var/www/html/laravel/CoopsBank/vendor/symfony/console/Application.php(1078): Illuminate\\Console\\Command->run()
+#6 /var/www/html/laravel/CoopsBank/vendor/symfony/console/Application.php(324): Symfony\\Component\\Console\\Application->doRunCommand()
+#7 /var/www/html/laravel/CoopsBank/vendor/symfony/console/Application.php(175): Symfony\\Component\\Console\\Application->doRun()
+#8 /var/www/html/laravel/CoopsBank/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(201): Symfony\\Component\\Console\\Application->run()
+#9 /var/www/html/laravel/CoopsBank/artisan(37): Illuminate\\Foundation\\Console\\Kernel->handle()
+#10 {main}
+"} 

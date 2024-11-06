@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Config;
 use App\Models\OrgUser;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use App\Traits\SpecimenUpload;
 use Exception;
 use Session;
 use Storage;

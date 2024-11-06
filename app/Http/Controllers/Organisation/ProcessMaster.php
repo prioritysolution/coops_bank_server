@@ -62,7 +62,7 @@ class ProcessMaster extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $error_message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
@@ -167,7 +167,7 @@ class ProcessMaster extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $error_message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
@@ -238,7 +238,7 @@ class ProcessMaster extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $error_message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
@@ -343,7 +343,7 @@ class ProcessMaster extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $error_message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
@@ -448,7 +448,7 @@ class ProcessMaster extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $error_message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
@@ -554,13 +554,13 @@ class ProcessMaster extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $error_message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
                     return response()->json([
                         'message' => 'Success',
-                        'details' => 'Block Added Successfully !!',
+                        'details' => 'Block Updated Successfully !!',
                     ],200);
                 }
 
@@ -626,7 +626,7 @@ class ProcessMaster extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $error_message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
@@ -732,7 +732,7 @@ class ProcessMaster extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $error_message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
@@ -805,7 +805,7 @@ class ProcessMaster extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $error_message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
@@ -912,7 +912,7 @@ class ProcessMaster extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $error_message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
@@ -1018,7 +1018,7 @@ class ProcessMaster extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $error_message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
@@ -1125,7 +1125,7 @@ class ProcessMaster extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $error_message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
@@ -1196,7 +1196,7 @@ class ProcessMaster extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $error_message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
@@ -1301,7 +1301,7 @@ class ProcessMaster extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $error_message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
@@ -1717,7 +1717,7 @@ class ProcessMaster extends Controller
                     return response()->json([
                         'message' => 'Error',
                         'details' => $message,
-                    ],400);
+                    ],200);
                  }
                  else{
                     DB::connection('coops')->commit();
@@ -1726,10 +1726,6 @@ class ProcessMaster extends Controller
                         'details' => 'Agent Successfully Added !!',
                     ],200);
                  }
-                 
-                    
-                 
- 
  
              } catch (Exception $ex) {
                  DB::connection('coops')->rollBack();
@@ -1839,7 +1835,7 @@ class ProcessMaster extends Controller
                     return response()->json([
                         'message' => 'Error',
                         'details' => $message,
-                    ],400);
+                    ],200);
                  }
                  else{
                     DB::connection('coops')->commit();
