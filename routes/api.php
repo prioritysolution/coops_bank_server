@@ -21,6 +21,7 @@ use App\Http\Controllers\Organisation\ProcessBorrowings;
 use App\Http\Controllers\Organisation\ProcessOpening;
 use App\Http\Controllers\Organisation\ProcessFinancialReport;
 use App\Http\Controllers\Organisation\ProcessModuleReport;
+use App\Http\Controllers\Organisation\ProcessVoucherEntry;
 // user Controller end here
 
 /*
@@ -245,6 +246,15 @@ Route::group([
 
     // Bank Route End Here
 
+    // Voucher Entry Route Start Here
+
+    Route::get('/Org/ProcessVoucherEntry/GetLedgerList',[ProcessVoucherEntry::class,'get_ledger_list']);
+    Route::get('/Org/ProcessVoucherEntry/GetSubLedger/{org_id}/{gl_id}',[ProcessVoucherEntry::class,'get_sub_ledger_list']);
+    Route::post('/Org/ProcessVoucherEntry/GetSubLedgerBalance',[ProcessVoucherEntry::class,'get_subledger_balance']);
+    Route::post('/Org/ProcessVoucherEntry/PostVoucher',[ProcessVoucherEntry::class,'process_voucher_posting']);
+
+    // Voucher Entry Route End Here
+
     // Investment Route Start Here
 
     Route::get('/Org/ProcessInvestment/GetAccountType',[ProcessInvestment::class,'get_account_type']);
@@ -312,12 +322,21 @@ Route::group([
 
     // Modulewise Report Route Start Here
 
+    // share
     Route::get('/Org/ProcessModuleReport/Membership/GetReportType',[ProcessModuleReport::class,'get_mem_report_type']);
     Route::post('/Org/ProcessModuleReport/Membership/MemberRegister',[ProcessModuleReport::class,'process_member_register']);
     Route::post('/Org/ProcessModuleReport/Membership/TransRegister',[ProcessModuleReport::class,'process_member_trans_register']);
     Route::post('/Org/ProcessModuleReport/Membership/WithdrwanRegister',[ProcessModuleReport::class,'process_member_withdrw_register']);
     Route::post('/Org/ProcessModuleReport/Membership/GetDetailedList',[ProcessModuleReport::class,'process_member_detailedlist']);
     Route::post('/Org/ProcessModuleReport/Membership/GetDividendList',[ProcessModuleReport::class,'process_member_dividendlist']);
+
+    // end share
+
+    // deposit start
+    
+    Route::get('/Org/ProcessModuleReport/Deposit/GetReportType',[ProcessModuleReport::class,'get_dep_report_type']);
+    Route::post('/Org/ProcessModuleReport/Deposit/GetDetailedlist',[ProcessModuleReport::class,'process_dep_detailedlist']);
+    // deposit end
 
     // Modulewise Route End Here
 });

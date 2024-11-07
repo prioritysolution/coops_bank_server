@@ -385,4 +385,32 @@ class ProcessModuleReport extends Controller
             throw new HttpResponseException($response);
         }  
     }
+
+    public function get_dep_report_type(){
+        try {
+           
+            $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Module_Name=? And Option_Name=?",['Deposit','Report Type']);
+
+            if(!$sql){
+                throw new Exception("No Data Found !!");
+            }
+                return response()->json([
+                    'message' => 'Data Found',
+                    'details' => $sql,
+                ],200);
+            
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        } 
+    }
+
+    public function process_dep_detailedlist(Request $request){
+        
+    }
 }
