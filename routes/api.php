@@ -336,7 +336,14 @@ Route::group([
     
     Route::get('/Org/ProcessModuleReport/Deposit/GetReportType',[ProcessModuleReport::class,'get_dep_report_type']);
     Route::post('/Org/ProcessModuleReport/Deposit/GetDetailedlist',[ProcessModuleReport::class,'process_dep_detailedlist']);
+    Route::get('/Org/ProcessModuleReport/Deposit/GetProduct/{org_id}',[ProcessModuleReport::class,'get_deposit_product']);
     // deposit end
+
+    // Loan Start
+    Route::get('/Org/ProcessModuleReport/Loan/GetReportType',[ProcessModuleReport::class,'get_loan_product']);
+    Route::post('/Org/ProcessModuleReport/Loan/GetDetailedList',[ProcessModuleReport::class,'process_loan_detailedlist']);
+
+    // Loan End Here
 
     // Modulewise Route End Here
 });

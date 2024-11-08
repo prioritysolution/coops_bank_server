@@ -31,7 +31,7 @@ class ProcessVoucherEntry extends Controller
     public function get_ledger_list(){
         try {
            
-            $sql = DB::select("Select Id,Ledger_Name From priority_coopsol_organisation.mst_org_acct_ledger Where Id<>2 Order By Sub_Head Asc;");
+            $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Id<>2 Order By Sub_Head Asc;");
 
             if(!$sql){
                 throw new Exception("No Data Found !!");
@@ -229,7 +229,7 @@ class ProcessVoucherEntry extends Controller
                 else{
                     DB::connection('coops')->commit();
                     return response()->json([
-                        'message' => 'Data Found',
+                        'message' => 'Success',
                         'details' => $message,
                     ],200);
                 }

@@ -57,7 +57,7 @@ class ProcessDeposit extends Controller
     public function get_org_deposit_product(Int $org_id, Int $type_id){
         try {
            
-            $sql = DB::select("Select m.Id,m.Prd_SH_Name,p.Deposit_Type From priority_coopsol_organisation.map_org_deposit_product m join priority_coopsol_organisation.mst_org_deposit_product p on p.Id=m.Prod_Id Where m.Org_Id=? And p.Product_Type=?;",[$org_id,$type_id]);
+            $sql = DB::select("Select m.Id,m.Prd_SH_Name,p.Deposit_Type From map_org_deposit_product m join mst_org_deposit_product p on p.Id=m.Prod_Id Where m.Org_Id=? And p.Product_Type=?;",[$org_id,$type_id]);
 
             if(!$sql){
                 throw new Exception("No Data Found !!");
