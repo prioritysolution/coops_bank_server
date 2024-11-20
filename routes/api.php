@@ -48,6 +48,8 @@ Route::group([
     Route::get('/OrgSetup/GetModule',[OrgRegister::class,'get_org_module']);
     Route::post('/OrgSetup/AddOrg',[OrgRegister::class,'process_org']);
     Route::get('/OrgSetup/OrgList',[OrgRegister::class,'get_org_list']);
+    Route::post('/OrgSetup/MapBranch',[OrgRegister::class,'process_org_branch']);
+    Route::get('/OrgSetup/GetBranch/{org_id}',[OrgRegister::class,'get_orgwise_branch']);
     Route::post('/OrgSetup/AddModule',[OrgRegister::class,'process_org_module']);
     Route::post('/OrgSetup/AddFinancialYear',[OrgRegister::class,'process_org_fin_year']);
     Route::get('/OrgSetup/GetListOrgModule',[OrgRegister::class,'get_org_module_list']);
@@ -223,7 +225,7 @@ Route::group([
     Route::post('/Org/ProcessLoan/DIsbShareDepBalance',[ProcessLoan::class,'get_dep_share_balance']);
     Route::post('/Org/ProcessLoan/GetDisbNeedAmount',[ProcessLoan::class,'get_disb_cal_amount']);
     Route::post('/Org/ProcessLoan/DisburseLoan',[ProcessLoan::class,'process_loan_disburse']);
-    Route::post('/Org/ProcessLoan/GetRepayData',[ProcessLoan::class,'get_repay_date']);
+    Route::post('/Org/ProcessLoan/GetRepayData',[ProcessLoan::class,'get_repay_data']);
     Route::post('/Org/ProcessLoan/PostRepay',[ProcessLoan::class,'process_loan_repayment']);
 
     Route::post('/Org/ProcessLoan/GetLedger',[ProcessLoan::class,'process_ledger']);
@@ -340,7 +342,8 @@ Route::group([
     // deposit end
 
     // Loan Start
-    Route::get('/Org/ProcessModuleReport/Loan/GetReportType',[ProcessModuleReport::class,'get_loan_product']);
+    Route::get('/Org/ProcessModuleReport/Loan/GetReportType',[ProcessModuleReport::class,'get_ln_report_type']);
+    Route::get('/Org/ProcessModuleReport/Loan/GetProduct/{org_id}',[ProcessModuleReport::class,'get_loan_product']);
     Route::post('/Org/ProcessModuleReport/Loan/GetDetailedList',[ProcessModuleReport::class,'process_loan_detailedlist']);
 
     // Loan End Here

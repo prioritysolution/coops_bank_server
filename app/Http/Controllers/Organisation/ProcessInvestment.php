@@ -34,8 +34,12 @@ class ProcessInvestment extends Controller
            
             $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Module_Name=? And Option_Name=? And Is_Active=?;",['Investment','Account Type',1]);
 
-            if(!$sql){
-                throw new Exception;
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             
@@ -60,8 +64,12 @@ class ProcessInvestment extends Controller
            
             $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Module_Name=? And Option_Name=? And Is_Active=?;",['Investment','Type',1]);
 
-            if(!$sql){
-                throw new Exception;
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             
@@ -86,8 +94,12 @@ class ProcessInvestment extends Controller
            
             $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Module_Name=? And Option_Name=? And Is_Active=?;",['Investment','Interest Type',1]);
 
-            if(!$sql){
-                throw new Exception;
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             
@@ -130,8 +142,12 @@ class ProcessInvestment extends Controller
 
             $sql = DB::connection('coops')->select("Select UDF_CAL_INVEST_MATURE_VALUE(?,?,?,?,?) As Mature_Val;",[$request->acct_type,$request->amount,$request->roi,$request->duration,$request->intt_type]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
                 return response()->json([
@@ -170,9 +186,13 @@ class ProcessInvestment extends Controller
            }
             
 
-            if(!$sql){
-                throw new Exception;
-            }
+           if (empty($sql)) {
+            // Custom validation for no data found
+            return response()->json([
+                'message' => 'No Data Found',
+                'details' => [],
+            ], 200);
+        }
 
             
                 return response()->json([
@@ -307,8 +327,12 @@ class ProcessInvestment extends Controller
 
             $sql = DB::connection('coops')->select("Call USP_GET_INVEST_LIST(?);",[$type]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
             
             return response()->json([
@@ -505,8 +529,12 @@ class ProcessInvestment extends Controller
 
             $sql = DB::connection('coops')->select("Select Id,Invest_Type,Acct_Type,Account_No,Open_Date,Invest_Amt,Roi,Mature_Date,Mature_Val,Prn_Gl,Intt_Gl From mst_bank_investment Where Id=? And Is_Active=1 And Close_Trans_Id is null;",[$invest_id]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
             
             return response()->json([
@@ -628,8 +656,12 @@ class ProcessInvestment extends Controller
 
                 $sql = DB::connection('coops')->select("Select UDF_CAL_INVEST_MAT_INTT(?,?) As Interest;",[$request->invest_id,$request->date]);
 
-                if(!$sql){
-                    throw new Exception('Operation Error Found !!');
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([
@@ -763,8 +795,12 @@ class ProcessInvestment extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_RPT_INVEST_LEDGER(?,?,?,?);",[$request->invest_id,$request->form_date,$request->to_date,$request->mode]);
 
-                if(!$sql){
-                    throw new Exception('Could not process your request !!');
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([

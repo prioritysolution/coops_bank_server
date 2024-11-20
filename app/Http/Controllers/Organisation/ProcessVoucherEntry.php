@@ -33,8 +33,12 @@ class ProcessVoucherEntry extends Controller
            
             $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Id<>2 Order By Sub_Head Asc;");
 
-            if(!$sql){
-                throw new Exception("No Data Found !!");
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
                 return response()->json([

@@ -21,8 +21,12 @@ class ProcessModuleReport extends Controller
            
             $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Module_Name=? And Option_Name=?",['Member','Report Type']);
 
-            if(!$sql){
-                throw new Exception("No Data Found !!");
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             
@@ -66,8 +70,12 @@ class ProcessModuleReport extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_RPT_MEMBER_REGISTER(?,?,?,?);",[$request->form_date,$request->to_date,$request->mem_id,$request->branch_id]);
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([
@@ -123,8 +131,12 @@ class ProcessModuleReport extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_RPT_MEMBER_TRANS_REGISTER(?,?,?,?);",[$request->form_date,$request->to_date,$request->mem_id,$request->branch_id]);
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([
@@ -180,8 +192,12 @@ class ProcessModuleReport extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_RPT_MEMBER_WITHDRW_REGISTER(?,?,?,?);",[$request->form_date,$request->to_date,$request->mem_id,$request->branch_id]);
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([
@@ -237,8 +253,12 @@ class ProcessModuleReport extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_RPT_MEMBER_DETAILED_LIST(?,?,?,?);",[$request->form_date,$request->to_date,$request->mem_id,$request->branch_id]);
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([
@@ -293,8 +313,12 @@ class ProcessModuleReport extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_RPT_MEMBER_DIVIDEND_LIST(?,?,?);",[$request->to_date,$request->mem_id,$request->branch_id]);
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([
@@ -331,9 +355,14 @@ class ProcessModuleReport extends Controller
            
             $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Module_Name=? And Option_Name=?",['Deposit','Report Type']);
 
-            if(!$sql){
-                throw new Exception("No Data Found !!");
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
+
                 return response()->json([
                     'message' => 'Data Found',
                     'details' => $sql,
@@ -355,8 +384,12 @@ class ProcessModuleReport extends Controller
            
             $sql = DB::select("Select m.Id,m.Prd_SH_Name From map_org_deposit_product m join mst_org_deposit_product p on p.Id=m.Prod_Id Where m.Org_Id=?;",[$org_id]);
 
-            if(!$sql){
-                throw new Exception("No Data Found !!");
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             
@@ -400,8 +433,12 @@ class ProcessModuleReport extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_RPT_DEPOSIT_DETAILEDLIST(?,?,?,?);",[$request->prod_id,$request->form_date,$request->to_date,$request->branch_id]);
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([
@@ -433,13 +470,17 @@ class ProcessModuleReport extends Controller
         }  
     }
 
-    public function get_loan_product(){
+    public function get_ln_report_type(){
         try {
            
             $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Module_Name=? And Option_Name=?",['Loan','Report Type']);
 
-            if(!$sql){
-                throw new Exception("No Data Found !!");
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
                 return response()->json([
                     'message' => 'Data Found',
@@ -455,6 +496,35 @@ class ProcessModuleReport extends Controller
 
             throw new HttpResponseException($response);
         } 
+    }
+
+    public function get_loan_product(Int $org_id){
+        try {
+
+            $sql = DB::select("Select Id,Prod_Sh_Name,Loan_Type From map_org_loan_product Where org_Id=?;",[$org_id]);
+
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
+           
+            return response()->json([
+                'message' => 'Data Found',
+                'details' => $sql,
+            ],200);
+        
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
     }
 
     public function process_loan_detailedlist(Request $request){

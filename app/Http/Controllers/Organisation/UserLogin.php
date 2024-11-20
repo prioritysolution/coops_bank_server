@@ -110,8 +110,12 @@ class UserLogin extends Controller
            
             $sql = DB::select("Select Id,Start_Dtae As Start_Date,End_Date From mst_org_financial_year Where Org_Id=? And Is_Active=?;",[$org_id,1]);
 
-            if(!$sql){
-                throw new Exception('No data found');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             
@@ -230,8 +234,12 @@ class UserLogin extends Controller
             config()->set('database.connections.coops', $db);
             $sql = DB::connection('coops')->select("Call USP_GET_DASHBOARD_ITEM(?,?);",[$request->branch_id,$request->date]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             return response()->json([

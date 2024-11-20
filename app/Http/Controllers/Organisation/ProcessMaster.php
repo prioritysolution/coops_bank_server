@@ -110,8 +110,12 @@ class ProcessMaster extends Controller
 
             $sql = DB::connection('coops')->select("Select Id,State_Name From mst_area_state Order By Id");
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             return response()->json([
@@ -286,8 +290,12 @@ class ProcessMaster extends Controller
 
             $sql = DB::connection('coops')->select("Select m.Id,m.Dist_Name,s.State_Name,s.Id As State_Id From mst_area_district m join mst_area_state s on s.Id=m.State_Id Order By m.Id;");
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             return response()->json([
@@ -391,8 +399,12 @@ class ProcessMaster extends Controller
 
             $sql = DB::connection('coops')->select("Select Id,Dist_Name From mst_area_district Where State_Id=?;",[$state_id]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             return response()->json([
@@ -496,8 +508,12 @@ class ProcessMaster extends Controller
 
             $sql = DB::connection('coops')->select("Select m.Id,m.Block_Name,s.State_Name,s.Id As State_Id,d.Dist_Name,d.Id As Dist_Id From mst_area_block m join mst_area_state s on s.Id=m.State_Id join mst_area_district d on d.Id=m.Dist_Id Order By m.Id;");
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             return response()->json([
@@ -674,8 +690,12 @@ class ProcessMaster extends Controller
 
             $sql = DB::connection('coops')->select("Select m.Id,m.STation_Name,s.State_Name,s.Id As State_Id,d.Dist_Name,d.Id As Dist_Id From mst_area_policestation m join mst_area_state s on s.Id=m.State_Id join mst_area_district d on d.Id=m.Dist_Id Order By m.Id;");
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             return response()->json([
@@ -853,8 +873,12 @@ class ProcessMaster extends Controller
 
             $sql = DB::connection('coops')->select("Select m.Id,m.Post_Off_Name,m.Pin_Code,s.State_Name,s.Id As State_Id,d.Dist_Name,d.Id As Dist_Id From mst_area_post_office m join mst_area_state s on s.Id=m.State_Id join mst_area_district d on d.Id=m.Dist_Id Order By m.Id;");
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             return response()->json([
@@ -960,8 +984,12 @@ class ProcessMaster extends Controller
 
             $sql = DB::connection('coops')->select("Select Id,Block_Name From mst_area_block Where State_Id=? And Dist_Id=?;",[$state_id,$dist_id]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             return response()->json([
@@ -1066,8 +1094,12 @@ class ProcessMaster extends Controller
 
             $sql = DB::connection('coops')->select("Select m.Id,m.Vill_Name,m.State_Id,m.Dist_Id,m.Block_Id From mst_area_village m join mst_area_state s on s.Id=m.State_Id join mst_area_district d on d.Id=m.Dist_Id join mst_area_block b on b.Id=m.Block_Id Order By m.Id;");
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             return response()->json([
@@ -1244,8 +1276,12 @@ class ProcessMaster extends Controller
 
             $sql = DB::connection('coops')->select("Select Id,Unit_Name,Unit_No From mst_area_unit Order By Id;");
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             return response()->json([
@@ -1340,8 +1376,12 @@ class ProcessMaster extends Controller
 
             $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Module_Name=? And Option_Name=? And Is_Active=?;",['Member','Relation Type',1]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             return response()->json([
@@ -1364,8 +1404,12 @@ class ProcessMaster extends Controller
 
             $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Module_Name=? And Option_Name=? And Is_Active=?;",['Member','Gender',1]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             return response()->json([
@@ -1388,8 +1432,12 @@ class ProcessMaster extends Controller
 
             $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Module_Name=? And Option_Name=? And Is_Active=?;",['Member','Caste',1]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             return response()->json([
@@ -1412,8 +1460,12 @@ class ProcessMaster extends Controller
 
             $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Module_Name=? And Option_Name=? And Is_Active=?;",['Member','Religion',1]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             return response()->json([
@@ -1436,8 +1488,12 @@ class ProcessMaster extends Controller
 
             $sql = DB::select("Select Id,Note_Lavel,Note_Value From mst_cash_denom Where Is_Active=? Order By Sl;",[1]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             return response()->json([
@@ -1469,8 +1525,12 @@ class ProcessMaster extends Controller
 
             $sql = DB::connection('coops')->select("Select Id,Vill_Name From mst_area_village Where Block_Id=? And Is_Active=?;",[$blk_id,1]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             return response()->json([
@@ -1502,8 +1562,12 @@ class ProcessMaster extends Controller
 
             $sql = DB::connection('coops')->select("Select Id,STation_Name From mst_area_policestation Where Dist_Id=? And Is_Active=?;",[$dist_id,1]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             return response()->json([
@@ -1535,8 +1599,12 @@ class ProcessMaster extends Controller
 
             $sql = DB::connection('coops')->select("Select Id,Post_Off_Name,Pin_Code From mst_area_post_office Where Dist_Id=? And Is_Active=?;",[$dist_id,1]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             return response()->json([
@@ -1629,8 +1697,12 @@ class ProcessMaster extends Controller
 
             $sql = DB::connection('coops')->select("Select Id,Adm_Fees,Share_Rate From config_share_product Where Mem_Type=? And Is_Active=?;",[$prod_id,1]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             return response()->json([
@@ -1653,8 +1725,12 @@ class ProcessMaster extends Controller
            
             $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Module_Name=? And Option_Name=?",['Deposit','Agent Pay Out']);
 
-            if(!$sql){
-                throw new Exception("No Data Found !!");
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             
@@ -1764,8 +1840,12 @@ class ProcessMaster extends Controller
 
             $sql = DB::connection('coops')->select("Select Id,Agent_Name From mst_agent_master;");
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             return response()->json([

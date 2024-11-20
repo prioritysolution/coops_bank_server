@@ -476,8 +476,12 @@ class ProcessOpening extends Controller
 
             $sql = DB::select("Select Id,Head_Name From mst_org_accounts_head Where Is_Active=?;",[1]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
            
             return response()->json([
@@ -501,8 +505,12 @@ class ProcessOpening extends Controller
 
             $sql = DB::select("Select Id,Sub_Head_Name From mst_org_acct_sub_head Where Is_Active=? And Head_Id=?;",[1,$head_id]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
            
             return response()->json([
@@ -526,8 +534,12 @@ class ProcessOpening extends Controller
 
             $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=? And Sub_Head=?;",[1,$sub_id]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
            
             return response()->json([
@@ -617,8 +629,12 @@ class ProcessOpening extends Controller
 
             $sql = DB::select("Call USP_GET_ORG_BRANCH(?,?);",[$org_id,$branch_id]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
            
             return response()->json([

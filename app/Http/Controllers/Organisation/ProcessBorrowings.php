@@ -33,8 +33,12 @@ class ProcessBorrowings extends Controller
            
             $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Module_Name=? And Option_Name=? And Is_Active=?;",['Borrowings','Product Type',1]);
 
-            if(!$sql){
-                throw new Exception;
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             
@@ -59,8 +63,12 @@ class ProcessBorrowings extends Controller
            
             $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Module_Name=? And Option_Name=? And Is_Active=?;",['Borrowings','Repay Mode',1]);
 
-            if(!$sql){
-                throw new Exception;
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             
@@ -94,8 +102,12 @@ class ProcessBorrowings extends Controller
             }
             $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Sub_Head=?;",[$subHead]);
 
-            if(!$sql){
-                throw new Exception;
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             
@@ -214,8 +226,12 @@ class ProcessBorrowings extends Controller
 
             $sql = DB::connection('coops')->select("Select Id,Concat(Product_Name,' - ',Account_No) As Account_No From mst_bank_borrowings Where Is_Active=1");
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
             
             return response()->json([
@@ -255,8 +271,12 @@ class ProcessBorrowings extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_GET_BORROW_ACCOUNT_INFO(?,?);",[$request->borrow_id,$request->date]);
 
-                if(!$sql){
-                    throw new Exception('No Data Found !!');
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([
@@ -479,8 +499,12 @@ class ProcessBorrowings extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_RPT_BORROW_LEDGER(?,?,?,?);",[$request->borrow_id,$request->form_date,$request->to_date,$request->mode]);
 
-                if(!$sql){
-                    throw new Exception('Could not process your request !!');
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([

@@ -38,8 +38,12 @@ class ProcessFinancialReport extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_RPT_GLBALANCING(?,?);",[$request->date,$request->branch_id]);
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                 $data_set = [];
@@ -106,8 +110,12 @@ class ProcessFinancialReport extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_RPT_DAYBOOK(?,?,?);",[$request->branch_id,$request->date,$request->mode]);
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([
@@ -162,8 +170,12 @@ class ProcessFinancialReport extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_GET_CASH_BALANCE(?,?,?);",[$request->branch_id,$request->date,$request->to_date]);
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([
@@ -219,8 +231,12 @@ class ProcessFinancialReport extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_RPT_CASH_ACCT(?,?,?,?);",[$request->branch_id,$request->form_date,$request->to_date,$request->mode]);
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([
@@ -275,8 +291,12 @@ class ProcessFinancialReport extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_RPT_CASH_BOOK(?,?,?);",[$request->branch_id,$request->date,$request->mode]);
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([
@@ -313,8 +333,12 @@ class ProcessFinancialReport extends Controller
            
             $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=1;");
 
-            if(!$sql){
-                throw new Exception('No data found');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             
@@ -358,8 +382,12 @@ class ProcessFinancialReport extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_RPT_ACCTLEDGER(?,?,?,?);",[$request->ledger_id,$request->form_date,$request->to_date,$request->branch_id]);
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([
@@ -416,8 +444,12 @@ class ProcessFinancialReport extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_RPT_LIST_VOUCHER(?,?,?,?,?);",[$request->ledger_id,$request->frm_date,$request->to_date,$request->branch_id,$request->mode]);
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([
@@ -463,8 +495,12 @@ class ProcessFinancialReport extends Controller
 
             $sql = DB::connection('coops')->select("Call USP_GET_VOUCHER_DETAILS(?);",[$txn_id]);
             
-            if(!$sql){
-                throw new Exception("No Data Found");
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
                 return response()->json([

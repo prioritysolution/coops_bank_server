@@ -34,8 +34,12 @@ class ProcessDeposit extends Controller
            
             $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Id In(Select Product_Type From mst_org_deposit_product Where Id In(Select Prod_Id From map_org_deposit_product Where Org_Id=?));",[$org_id]);
 
-            if(!$sql){
-                throw new Exception("No Data Found !!");
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             
@@ -59,8 +63,12 @@ class ProcessDeposit extends Controller
            
             $sql = DB::select("Select m.Id,m.Prd_SH_Name,p.Deposit_Type From map_org_deposit_product m join mst_org_deposit_product p on p.Id=m.Prod_Id Where m.Org_Id=? And p.Product_Type=?;",[$org_id,$type_id]);
 
-            if(!$sql){
-                throw new Exception("No Data Found !!");
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             
@@ -85,8 +93,12 @@ class ProcessDeposit extends Controller
            
             $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Module_Name=? And Option_Name=? And Is_Active=?;",['Deposit','Term',1]);
 
-            if(!$sql){
-                throw new Exception;
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             
@@ -111,8 +123,12 @@ class ProcessDeposit extends Controller
            
             $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Module_Name=? And Option_Name=? And Is_Active=?;",['Deposit','Operation Mode',1]);
 
-            if(!$sql){
-                throw new Exception;
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             
@@ -137,8 +153,12 @@ class ProcessDeposit extends Controller
            
             $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Module_Name=? And Option_Name=? And Is_Active=?;",['Deposit','Maturity Instruction',1]);
 
-            if(!$sql){
-                throw new Exception;
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             
@@ -163,8 +183,12 @@ class ProcessDeposit extends Controller
            
             $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Module_Name=? And Option_Name=? And Is_Active=?;",['Deposit','Interest Payout',1]);
 
-            if(!$sql){
-                throw new Exception;
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             
@@ -331,6 +355,15 @@ class ProcessDeposit extends Controller
                 config()->set('database.connections.coops', $db);
 
                 $sql = DB::connection('coops')->select("Select UDF_CAL_DEPOSIT_MATURE_VALUE(?,?,?,?,?) As Mat_Amt;",[$request->prod_id,$request->amount,$request->roi,$request->duration,$request->duration_unit]);
+
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
+                }
+
                 $mat_val = $sql[0]->Mat_Amt;
 
                     return response()->json([
@@ -386,14 +419,21 @@ class ProcessDeposit extends Controller
                 config()->set('database.connections.coops', $db);
 
                 $sql = DB::connection('coops')->select("Select UDF_CAL_DEPOSIT_PAYOUT_INTT(?,?,?,?) As Mat_Amt;",[$request->prod_id,$request->amount,$request->roi,$request->type_id]);
+
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
+                }
+
                 $mat_val = $sql[0]->Mat_Amt;
 
                     return response()->json([
                         'message' => 'Data Found',
                         'details' => $mat_val,
                     ],200);
-                
-
 
             } catch (Exception $ex) {
                 DB::connection('coops')->rollBack();
@@ -432,8 +472,12 @@ class ProcessDeposit extends Controller
 
             $sql = DB::connection('coops')->select("Select Id,Account_No From mst_deposit_account_master Where Prod_Type=1 And Mem_Id=?;",[$member_id]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
             
             return response()->json([
@@ -626,8 +670,12 @@ class ProcessDeposit extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_GET_DEP_ACCOUNT_DATA(?,?,?);",[$request->pAcct_No,$request->ptype,$request->date]);
 
-                if(!$sql){
-                    throw new Exception('No Data Found !!');
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
                     return response()->json([
                         'message' => 'Data Found',
@@ -673,8 +721,12 @@ class ProcessDeposit extends Controller
 
             $sql = DB::connection('coops')->select("Call USP_GET_MEMBER_DEP_ACCOUNT(?,?);",[$type,$value]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
            
                 return response()->json([
@@ -895,9 +947,14 @@ class ProcessDeposit extends Controller
 
             $sql = DB::connection('coops')->select("Select Image_Name,Sing_Name From mst_deposit_specimen Where Is_Active=1 And Acct_Id=?;",[$acct_id]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
+
             $image = $sql[0]->Image_Name;
             $singfile = $sql[0]->Sing_Name;
 
@@ -940,9 +997,13 @@ class ProcessDeposit extends Controller
 
                 $sql = DB::connection('coops')->select("Select UDF_GET_INTT_RATE(?,?,?,?) As Intt",[$request->prod_id,$request->duration,$request->dur_unit,$request->date]);
                 
-                if(!$sql){
-                    throw new Exception;
-                }
+                if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
 
                 $intt_rate = $sql[0]->Intt;
 
@@ -1064,6 +1125,7 @@ class ProcessDeposit extends Controller
                 if(!$sql){
                     throw new Exception("No Data Found");
                 }
+
                 $erroe_No = $sql[0]->Error;
                 $message = $sql[0]->Message;
 
@@ -1218,9 +1280,13 @@ class ProcessDeposit extends Controller
 
                 $sql = DB::connection('coops')->select("Select UDF_CAL_MATURE_INTT(?,?,?,?) As Mature_Intt;",[$request->acct_id,$request->date,0,1]);
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
-                }
+                if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
 
                 $mat_intt = $sql[0]->Mature_Intt;
                 
@@ -1276,8 +1342,12 @@ class ProcessDeposit extends Controller
 
                 $sql = DB::connection('coops')->select("Select UDF_CAL_MATURE_INTT(?,?,?,?) As Mature_Intt;",[$request->acct_id,$request->date,$request->roi,2]);
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                 $mat_intt = $sql[0]->Mature_Intt;
@@ -1513,8 +1583,12 @@ class ProcessDeposit extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_DEP_GET_INTT_PAYOUT_DATA(?,?,?,?,?);",[$request->month,$request->year,$request->acct_no,$request->type,$request->mode]);
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([
@@ -1769,8 +1843,12 @@ class ProcessDeposit extends Controller
 
                 $sql = DB::connection('coops')->select("Select UDF_GET_DEP_BALANCE(?,?) As Balance;",[$request->Acct_Id,$request->Date]);
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([
@@ -1826,8 +1904,12 @@ class ProcessDeposit extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_RPT_GET_DEPOSIT_LEDGER(?,?,?,?);",[$request->Acct_Id,$request->form_date,$request->to_date,$request->mode]);
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([

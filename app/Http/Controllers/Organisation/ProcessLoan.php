@@ -48,8 +48,12 @@ class ProcessLoan extends Controller
 
             $sql = DB::connection('coops')->select("Call USP_GET_LOAN_MEMBER_DATA(?,?);",[$request->mem_no,$request->date]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             $result = $sql[0]->Error_No;
@@ -95,8 +99,12 @@ class ProcessLoan extends Controller
 
             $sql = DB::select("Select Id,Prod_Sh_Name,Loan_Type From map_org_loan_product Where org_Id=?;",[$org_Id]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
            
             return response()->json([
@@ -129,8 +137,12 @@ class ProcessLoan extends Controller
 
             $sql = DB::connection('coops')->select("Call USP_GET_LOAN_PARAM(?,?);",[$prod_id,2]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
                 return response()->json([
@@ -162,8 +174,12 @@ class ProcessLoan extends Controller
 
             $sql = DB::connection('coops')->select("Call USP_GET_LOAN_PARAM(?,?);",[$prod_id,1]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
                 return response()->json([
@@ -201,8 +217,12 @@ class ProcessLoan extends Controller
 
             $sql = DB::connection('coops')->select("Call USP_CHECK_LOAN_PARAM(?,?,?,?,?);",[$request->prod_id,$request->amount,null,null,1]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             $result = $sql[0]->Error_No;
@@ -264,8 +284,12 @@ class ProcessLoan extends Controller
 
             $sql = DB::connection('coops')->select("Call USP_CHECK_LOAN_PARAM(?,?,?,?,?);",[$request->prod_id,null,$request->duration,$request->dur_unit,2]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             $result = $sql[0]->Error_No;
@@ -311,8 +335,12 @@ class ProcessLoan extends Controller
 
             $sql = DB::select("Select Roi From map_org_loan_product Where org_Id=? And Id=?;",[$org_id,$prod_id]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
            
             return response()->json([
@@ -352,8 +380,12 @@ class ProcessLoan extends Controller
 
             $sql = DB::connection('coops')->select("Select UDF_GEN_LOAN_EMI(?,?,?) As Emi;",[$request->principal,$request->roi,$request->duration]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             $result = $sql[0]->Emi;
@@ -405,8 +437,12 @@ class ProcessLoan extends Controller
 
             $sql = DB::connection('coops')->select("Call USP_CHECK_ELIGIBLE_LOAN(?,?,?);",[$request->mem_id,$request->prod_id,$request->date]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             $error_No = $sql[0]->Error_No;
@@ -531,8 +567,12 @@ class ProcessLoan extends Controller
 
             $sql = DB::connection('coops')->select("Call USP_LOAN_GET_DISB_LIST(?);",[$branch_id]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
                 return response()->json([
@@ -569,8 +609,12 @@ class ProcessLoan extends Controller
 
             $sql = DB::connection('coops')->select("Call USP_LOAN_SEARCH_ACCOUNT(?,?,?);",[$request->member_name,$request->member_no,$request->mode]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
            
             return response()->json([
@@ -614,8 +658,12 @@ class ProcessLoan extends Controller
 
             $sql = DB::connection('coops')->select("Call USP_LOAN_SCHDULE_DATA(?,?);",[$acct_id,$mode]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
                 return response()->json([
@@ -654,8 +702,12 @@ class ProcessLoan extends Controller
 
             $sql = DB::connection('coops')->select("Call USP_LOAN_GET_DISB_SHDEP_BALANCE(?,?,?);",[$request->mem_id,$request->prod_id,$request->date]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
                 return response()->json([
@@ -707,8 +759,12 @@ class ProcessLoan extends Controller
 
             $sql = DB::connection('coops')->select("Call USP_LOAN_DISB_NEED_AMOUNT(?,?,?,?,?);",[$request->mem_id,$request->share_bal,$request->prod_id,$request->disb_amount,$request->date]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
                 return response()->json([
@@ -827,7 +883,7 @@ class ProcessLoan extends Controller
     }   
     }
 
-    public function get_repay_date(Request $request){
+    public function get_repay_data(Request $request){
         $validator = Validator::make($request->all(),[
             'org_id' => 'required',
             'acct_no' => 'required',
@@ -847,8 +903,12 @@ class ProcessLoan extends Controller
 
             $sql = DB::connection('coops')->select("Call USP_GET_LON_REPAY_DATA(?,?);",[$request->acct_no,$request->date]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             $error = $sql[0]->Err_No;
@@ -867,8 +927,6 @@ class ProcessLoan extends Controller
                 ],200);
             }
 
-                
-            
         } catch (Exception $ex) {
             $response = response()->json([
                 'message' => 'Error Found',
@@ -1004,8 +1062,12 @@ class ProcessLoan extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_RPT_LOAN_LEDGER(?,?,?,?);",[$request->Acct_Id,$request->form_date,$request->to_date,$request->mode]);
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([

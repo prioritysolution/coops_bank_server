@@ -125,9 +125,14 @@ class ProcessMembership extends Controller
 
             $sql = DB::connection('coops')->select("Call USP_GET_GLOBAL_MEM_DET(?);",[$member_no]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
+
             $error = $sql[0]->Error;
             $message = $sql[0]->Message;
 
@@ -143,8 +148,6 @@ class ProcessMembership extends Controller
                     'details' => $sql,
                 ],200);
             }
-
-            
 
         } catch (Exception $ex) {
             $response = response()->json([
@@ -170,8 +173,12 @@ class ProcessMembership extends Controller
 
             $sql = DB::connection('coops')->select("Call USP_GLOBAL_MEMBER_SEARCH(?);",[$mem_name]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
             
                 return response()->json([
@@ -204,8 +211,12 @@ class ProcessMembership extends Controller
 
             $sql = DB::connection('coops')->select("Call USP_GET_SHPROD_DETAILS(?);",[$type_id]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             $result = $sql[0]->Error_No;
@@ -358,8 +369,12 @@ class ProcessMembership extends Controller
 
             $sql = DB::connection('coops')->select("Call USP_GET_MEMBER_INFO(?,?);",[$request->mem_no,$request->date]);
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             $result = $sql[0]->Error_No;
@@ -710,8 +725,12 @@ class ProcessMembership extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_RPT_SHARE_LEDGER(?,?,?,?);",[$request->Acct_Id,$request->form_date,$request->to_date,$request->mode]);
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([
@@ -765,6 +784,15 @@ class ProcessMembership extends Controller
                 config()->set('database.connections.coops', $db);
 
                 $sql = DB::connection('coops')->select("Call USP_GET_MEM_ENQUERY(?,?,?);",[$request->mem_Id,$request->form_date,$request->to_date]);
+
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
+                }
+                
                 $groupedData = [];
                 foreach ($sql as $detail) {
                     $queryType = $detail->QueryType;
@@ -778,9 +806,7 @@ class ProcessMembership extends Controller
                     $groupedData[$queryType][] = $detail;
                 }
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
-                }
+                
 
                     return response()->json([
                         'message' => 'Data Found',

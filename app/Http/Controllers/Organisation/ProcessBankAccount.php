@@ -32,8 +32,12 @@ class ProcessBankAccount extends Controller
            
             $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Module_Name=? And Option_Name=? And Is_Active=?;",['Bank','Account Type',1]);
 
-            if(!$sql){
-                throw new Exception;
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             
@@ -58,8 +62,12 @@ class ProcessBankAccount extends Controller
            
             $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Sub_Head=15;");
 
-            if(!$sql){
-                throw new Exception;
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             
@@ -169,8 +177,12 @@ class ProcessBankAccount extends Controller
 
             $sql = DB::connection('coops')->select("Select Id,Bank_Name,Bank_Branch,Bank_IFSC,Account_No,UDF_GET_OPTION_NAME(Account_Type) As Type From mst_bank_account_master Where Is_Active=1;");
 
-            if(!$sql){
-                throw new Exception('No Data Found !!');
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
            
                 return response()->json([
@@ -210,9 +222,14 @@ class ProcessBankAccount extends Controller
 
                 $sql = DB::connection('coops')->select("Select UDF_CAL_BANK_BAL(?,?) As Balance;",[$request->account_id,$request->date]);
 
-                if(!$sql){
-                    throw new Exception('Could not process your request !!');
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
+
                 $balance = $sql[0]->Balance;
 
                 
@@ -608,9 +625,13 @@ class ProcessBankAccount extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_RPT_BANK_LEDGER(?,?,?,?);",[$request->bank_id,$request->form_date,$request->to_date,$request->mode]);
 
-                if(!$sql){
-                    throw new Exception('Could not process your request !!');
-                }
+                if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
 
                     return response()->json([
                         'message' => 'Data Found',
