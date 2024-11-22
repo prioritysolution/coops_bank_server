@@ -337,7 +337,11 @@ Route::group([
     // deposit start
     
     Route::get('/Org/ProcessModuleReport/Deposit/GetReportType',[ProcessModuleReport::class,'get_dep_report_type']);
+    Route::post('/Org/ProcessModuleReport/Deposit/OpeningRegister',[ProcessModuleReport::class,'process_dep_open_register']);
+    Route::post('/Org/ProcessModuleReport/Deposit/TransRegister',[ProcessModuleReport::class,'process_dep_trans_register']);
+    Route::post('/Org/ProcessModuleReport/Deposit/CloseRegister',[ProcessModuleReport::class,'process_dep_close_register']);
     Route::post('/Org/ProcessModuleReport/Deposit/GetDetailedlist',[ProcessModuleReport::class,'process_dep_detailedlist']);
+    Route::post('/Org/ProcessModuleReport/Deposit/GetInterestList',[ProcessModuleReport::class,'process_interest_list']);
     Route::get('/Org/ProcessModuleReport/Deposit/GetProduct/{org_id}',[ProcessModuleReport::class,'get_deposit_product']);
     // deposit end
 
