@@ -719,7 +719,7 @@ class ProcessModuleReport extends Controller
         }
     }
     ################################################################################ End Deposit Module ###########################################################################################
-
+    ################################################################################ Loan Module Start ############################################################################################
     public function get_ln_report_type(){
         try {
            
@@ -775,6 +775,120 @@ class ProcessModuleReport extends Controller
 
             throw new HttpResponseException($response);
         }
+    }
+
+    public function process_ln_disb_register(Request $request){
+        $validator = Validator::make($request->all(),[
+            'branch_id' => 'required',
+            'form_date' => 'required',
+            'to_date' => 'required',
+            'prod_id' => 'required',
+            'org_id' => 'required'
+        ]);
+
+        if($validator->passes()){
+
+            try {
+
+                $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+                if(!$sql){
+                  throw new Exception;
+                }
+                $org_schema = $sql[0]->db;
+                $db = Config::get('database.connections.mysql');
+                $db['database'] = $org_schema;
+                config()->set('database.connections.coops', $db);
+
+                $sql = DB::connection('coops')->select("Call USP_RPT_LOAN_DISB_REGISTER(?,?,?,?);",[$request->form_date,$request->to_date,$request->prod_id,$request->branch_id]);
+                
+                if(!$sql){
+                    throw new Exception("No Data Found");
+                }
+
+                    return response()->json([
+                        'message' => 'Data Found',
+                        'details' => $sql,
+                    ],200);
+                
+
+            } catch (Exception $ex) {
+                
+                $response = response()->json([
+                    'message' => 'Error Found',
+                    'details' => $ex->getMessage(),
+                ],400);
+    
+                throw new HttpResponseException($response);
+            }
+        }
+        else{
+
+            $errors = $validator->errors();
+
+            $response = response()->json([
+                'message' => 'Invalid data send',
+                'details' => $errors->messages(),
+            ],400);
+        
+            throw new HttpResponseException($response);
+        } 
+    }
+
+    public function process_ln_repay_register(Request $request){
+        $validator = Validator::make($request->all(),[
+            'branch_id' => 'required',
+            'form_date' => 'required',
+            'to_date' => 'required',
+            'prod_id' => 'required',
+            'org_id' => 'required'
+        ]);
+
+        if($validator->passes()){
+
+            try {
+
+                $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+                if(!$sql){
+                  throw new Exception;
+                }
+                $org_schema = $sql[0]->db;
+                $db = Config::get('database.connections.mysql');
+                $db['database'] = $org_schema;
+                config()->set('database.connections.coops', $db);
+
+                $sql = DB::connection('coops')->select("Call USP_RPT_LOAN_REPAY_REGISTER(?,?,?,?);",[$request->form_date,$request->to_date,$request->prod_id,$request->branch_id]);
+                
+                if(!$sql){
+                    throw new Exception("No Data Found");
+                }
+
+                    return response()->json([
+                        'message' => 'Data Found',
+                        'details' => $sql,
+                    ],200);
+                
+
+            } catch (Exception $ex) {
+                
+                $response = response()->json([
+                    'message' => 'Error Found',
+                    'details' => $ex->getMessage(),
+                ],400);
+    
+                throw new HttpResponseException($response);
+            }
+        }
+        else{
+
+            $errors = $validator->errors();
+
+            $response = response()->json([
+                'message' => 'Invalid data send',
+                'details' => $errors->messages(),
+            ],400);
+        
+            throw new HttpResponseException($response);
+        } 
     }
 
     public function process_loan_detailedlist(Request $request){
@@ -833,4 +947,124 @@ class ProcessModuleReport extends Controller
             throw new HttpResponseException($response);
         }  
     }
+
+    ################################################################################ End Loan Module ##############################################################################################
+    ################################################################################ Bank Module Start ############################################################################################
+
+    public function get_bank_report_type(){
+        try {
+           
+            $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Module_Name=? And Option_Name=?",['Bank','Report Type']);
+
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
+                return response()->json([
+                    'message' => 'Data Found',
+                    'details' => $sql,
+                ],200);
+            
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        } 
+    }
+
+    public function process_bank_detailedlist(Request $request){
+        $validator = Validator::make($request->all(),[
+            'branch_id' => 'required',
+            'form_date' => 'required',
+            'to_date' => 'required',
+            'org_id' => 'required'
+        ]);
+
+        if($validator->passes()){
+
+            try {
+
+                $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+                if(!$sql){
+                  throw new Exception;
+                }
+                $org_schema = $sql[0]->db;
+                $db = Config::get('database.connections.mysql');
+                $db['database'] = $org_schema;
+                config()->set('database.connections.coops', $db);
+
+                $sql = DB::connection('coops')->select("Call USP_RPT_BANK_DETAILEDLIST(?,?,?,?);",[$request->form_date,$request->to_date,$request->branch_id]);
+                
+                if(!$sql){
+                    throw new Exception("No Data Found");
+                }
+
+                    return response()->json([
+                        'message' => 'Data Found',
+                        'details' => $sql,
+                    ],200);
+                
+
+            } catch (Exception $ex) {
+                
+                $response = response()->json([
+                    'message' => 'Error Found',
+                    'details' => $ex->getMessage(),
+                ],400);
+    
+                throw new HttpResponseException($response);
+            }
+        }
+        else{
+
+            $errors = $validator->errors();
+
+            $response = response()->json([
+                'message' => 'Invalid data send',
+                'details' => $errors->messages(),
+            ],400);
+        
+            throw new HttpResponseException($response);
+        } 
+    }
+
+    ################################################################################ End Bank Module ##############################################################################################
+    ################################################################################ Investment Module Start ######################################################################################
+
+    public function get_invest_report_type(){
+        try {
+           
+            $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Module_Name=? And Option_Name=?",['Investment','Report Type']);
+
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
+                return response()->json([
+                    'message' => 'Data Found',
+                    'details' => $sql,
+                ],200);
+            
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
+
+    ################################################################################ Investment Module End ########################################################################################
 }

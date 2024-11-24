@@ -337,21 +337,35 @@ Route::group([
     // deposit start
     
     Route::get('/Org/ProcessModuleReport/Deposit/GetReportType',[ProcessModuleReport::class,'get_dep_report_type']);
+    Route::get('/Org/ProcessModuleReport/Deposit/GetProduct/{org_id}',[ProcessModuleReport::class,'get_deposit_product']);
     Route::post('/Org/ProcessModuleReport/Deposit/OpeningRegister',[ProcessModuleReport::class,'process_dep_open_register']);
     Route::post('/Org/ProcessModuleReport/Deposit/TransRegister',[ProcessModuleReport::class,'process_dep_trans_register']);
     Route::post('/Org/ProcessModuleReport/Deposit/CloseRegister',[ProcessModuleReport::class,'process_dep_close_register']);
     Route::post('/Org/ProcessModuleReport/Deposit/GetDetailedlist',[ProcessModuleReport::class,'process_dep_detailedlist']);
     Route::post('/Org/ProcessModuleReport/Deposit/GetInterestList',[ProcessModuleReport::class,'process_interest_list']);
-    Route::get('/Org/ProcessModuleReport/Deposit/GetProduct/{org_id}',[ProcessModuleReport::class,'get_deposit_product']);
     // deposit end
 
     // Loan Start
     Route::get('/Org/ProcessModuleReport/Loan/GetReportType',[ProcessModuleReport::class,'get_ln_report_type']);
     Route::get('/Org/ProcessModuleReport/Loan/GetProduct/{org_id}',[ProcessModuleReport::class,'get_loan_product']);
+    Route::post('/Org/ProcessModuleReport/Loan/GetDisburseRegister',[ProcessModuleReport::class,'process_ln_disb_register']);
+    Route::post('/Org/ProcessModuleReport/Loan/GetRepayRegister',[ProcessModuleReport::class,'process_ln_repay_register']);
     Route::post('/Org/ProcessModuleReport/Loan/GetDetailedList',[ProcessModuleReport::class,'process_loan_detailedlist']);
 
     // Loan End Here
 
+    // Bank Start Here
+    
+    Route::get('/Org/ProcessModuleReport/Bank/GetReportType',[ProcessModuleReport::class,'get_bank_report_type']);
+    Route::post('/Org/ProcessModuleReport/Bank/GetDetailedList',[ProcessModuleReport::class,'process_bank_detailedlist']);
+    
+    // Bank End Here
+
+    // Investment Start Here
+
+    Route::get('/Org/ProcessModuleReport/Investment/GetReportType',[ProcessModuleReport::class,'get_invest_report_type']);
+    
+    // Investment End Here
     // Modulewise Route End Here
 });
 
