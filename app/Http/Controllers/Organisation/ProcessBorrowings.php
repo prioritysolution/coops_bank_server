@@ -92,10 +92,10 @@ class ProcessBorrowings extends Controller
         try {
             switch ($type) {
                 case 1:
-                    $subHead = 3;
+                    $subHead = 5;
                     break;
                 case 2:
-                    $subHead = 26;
+                    $subHead = 36;
                     break;
                 default:
                     throw new Exception("Invalid type provided");

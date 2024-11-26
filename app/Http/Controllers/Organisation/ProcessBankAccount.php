@@ -60,7 +60,7 @@ class ProcessBankAccount extends Controller
     public function get_bank_gl(){
         try {
            
-            $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Sub_Head=15;");
+            $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Sub_Head=13;");
 
             if (empty($sql)) {
                 // Custom validation for no data found

@@ -850,13 +850,13 @@ class OrgRegister extends Controller
             }
             else{
                 if($type_name=='Prn'){
-                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=?",[1]);
+                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=? And Sub_Head=?",[1,6]);
                 }
                 else if($type_name=='Intt'){
-                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=?",[1]);
+                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=? And Sub_Head=?",[1,35]);
                 }
                 else if($type_name=='Prov'){
-                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=?",[1]);
+                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=? And Sub_Head=?",[1,7]);
                 }
                 else{
                     return response()->json([
@@ -1200,22 +1200,22 @@ class OrgRegister extends Controller
             }
             else{
                 if($type_name=='Prn_Curr'){
-                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=?",[1]);
+                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=? And Sub_Head=?",[1,15]);
                 }
                 else if($type_name=='Prn_Od'){
-                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=?",[1]);
+                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=? And Sub_Head=?",[1,15]);
                 }
                 else if($type_name=='Intt_Curr'){
-                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=?",[1]);
+                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=? And Sub_Head=?",[1,30]);
                 }
                 else if($type_name=='Intt_Od'){
-                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=?",[1]);
+                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=? And Sub_Head=?",[1,30]);
                 }
                 else if($type_name=='Prov_Curr'){
-                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=?",[1]);
+                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=? And Sub_Head=?",[1,18]);
                 }
                 else if($type_name=='Prov_Od'){
-                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=?",[1]);
+                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=? And Sub_Head=?",[1,18]);
                 }
                 else{
                     return response()->json([
@@ -1698,13 +1698,13 @@ class OrgRegister extends Controller
             }
             else{
                 if($type_name=='Adm'){
-                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=?",[1]);
+                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=? And Id=?",[1,186]);
                 }
                 else if($type_name=='Shr'){
-                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=?",[1]);
+                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=? And And Sub_Head=?",[1,1]);
                 }
                 else if($type_name=='Div'){
-                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=?",[1]);
+                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=? And Id=?",[1,63]);
                 }
                 else{
                     return response()->json([

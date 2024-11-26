@@ -31,7 +31,7 @@ class ProcessVoucherEntry extends Controller
     public function get_ledger_list(){
         try {
            
-            $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Id<>2 Order By Sub_Head Asc;");
+            $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Id<>2 Order By Sub_Head;");
 
             if (empty($sql)) {
                 // Custom validation for no data found

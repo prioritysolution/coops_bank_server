@@ -1000,7 +1000,7 @@ class ProcessModuleReport extends Controller
                 $db['database'] = $org_schema;
                 config()->set('database.connections.coops', $db);
 
-                $sql = DB::connection('coops')->select("Call USP_RPT_BANK_DETAILEDLIST(?,?,?,?);",[$request->form_date,$request->to_date,$request->branch_id]);
+                $sql = DB::connection('coops')->select("Call USP_RPT_BANK_DETAILEDLIST(?,?,?);",[$request->form_date,$request->to_date,$request->branch_id]);
                 
                 if(!$sql){
                     throw new Exception("No Data Found");
@@ -1066,5 +1066,148 @@ class ProcessModuleReport extends Controller
         }
     }
 
+    public function process_invest_detailedlist(Request $request){
+        $validator = Validator::make($request->all(),[
+            'branch_id' => 'required',
+            'form_date' => 'required',
+            'to_date' => 'required',
+            'org_id' => 'required'
+        ]);
+
+        if($validator->passes()){
+
+            try {
+
+                $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+                if(!$sql){
+                  throw new Exception;
+                }
+                $org_schema = $sql[0]->db;
+                $db = Config::get('database.connections.mysql');
+                $db['database'] = $org_schema;
+                config()->set('database.connections.coops', $db);
+
+                $sql = DB::connection('coops')->select("Call USP_RPT_INVEST_DETAILEDLIST(?,?,?);",[$request->form_date,$request->to_date,$request->branch_id]);
+                
+                if(!$sql){
+                    throw new Exception("No Data Found");
+                }
+
+                    return response()->json([
+                        'message' => 'Data Found',
+                        'details' => $sql,
+                    ],200);
+                
+
+            } catch (Exception $ex) {
+                
+                $response = response()->json([
+                    'message' => 'Error Found',
+                    'details' => $ex->getMessage(),
+                ],400);
+    
+                throw new HttpResponseException($response);
+            }
+        }
+        else{
+
+            $errors = $validator->errors();
+
+            $response = response()->json([
+                'message' => 'Invalid data send',
+                'details' => $errors->messages(),
+            ],400);
+        
+            throw new HttpResponseException($response);
+        } 
+    }
+
     ################################################################################ Investment Module End ########################################################################################
+    ################################################################################ Borrowings Module Start ######################################################################################
+
+    public function get_borrow_report_type(){
+        try {
+           
+            $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Module_Name=? And Option_Name=?",['Bank','Report Type']);
+
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
+                return response()->json([
+                    'message' => 'Data Found',
+                    'details' => $sql,
+                ],200);
+            
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        } 
+    }
+
+    public function process_borrow_detailedlist(Request $request){
+        $validator = Validator::make($request->all(),[
+            'branch_id' => 'required',
+            'form_date' => 'required',
+            'to_date' => 'required',
+            'org_id' => 'required'
+        ]);
+
+        if($validator->passes()){
+
+            try {
+
+                $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+                if(!$sql){
+                  throw new Exception;
+                }
+                $org_schema = $sql[0]->db;
+                $db = Config::get('database.connections.mysql');
+                $db['database'] = $org_schema;
+                config()->set('database.connections.coops', $db);
+
+                $sql = DB::connection('coops')->select("Call USP_RPT_BORROW_DETAILEDLIST(?,?,?);",[$request->form_date,$request->to_date,$request->branch_id]);
+                
+                if(!$sql){
+                    throw new Exception("No Data Found");
+                }
+
+                    return response()->json([
+                        'message' => 'Data Found',
+                        'details' => $sql,
+                    ],200);
+                
+
+            } catch (Exception $ex) {
+                
+                $response = response()->json([
+                    'message' => 'Error Found',
+                    'details' => $ex->getMessage(),
+                ],400);
+    
+                throw new HttpResponseException($response);
+            }
+        }
+        else{
+
+            $errors = $validator->errors();
+
+            $response = response()->json([
+                'message' => 'Invalid data send',
+                'details' => $errors->messages(),
+            ],400);
+        
+            throw new HttpResponseException($response);
+        } 
+    }
+
+    ################################################################################ Borrowings Module End Here ###################################################################################
 }

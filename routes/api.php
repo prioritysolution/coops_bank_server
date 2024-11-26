@@ -364,8 +364,16 @@ Route::group([
     // Investment Start Here
 
     Route::get('/Org/ProcessModuleReport/Investment/GetReportType',[ProcessModuleReport::class,'get_invest_report_type']);
+    Route::post('/Org/ProcessModuleReport/Investment/GetDetailedList',[ProcessModuleReport::class,'process_invest_detailedlist']);
     
     // Investment End Here
+
+    // Borrowings Module Start
+
+     Route::get('/Org/ProcessModuleReport/Borrowings/GetReportType',[ProcessModuleReport::class,'get_borrow_report_type']);
+     Route::post('/Org/ProcessModuleReport/Borrowings/GetDetailedList',[ProcessModuleReport::class,'process_borrow_detailedlist']);   
+
+    // Borrowings Module End Here
     // Modulewise Route End Here
 });
 

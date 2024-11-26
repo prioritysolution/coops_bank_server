@@ -179,10 +179,10 @@ class ProcessInvestment extends Controller
     public function get_invest_ledger(Int $mode){
         try {
            if($mode=1){
-            $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Sub_Head=16 And Is_Active=1");
+            $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Sub_Head=14 And Is_Active=1");
            }
            if($mode=2){
-            $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Sub_Head in(24,25) And Is_Active=1");
+            $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Sub_Head =32 And Is_Active=1");
            }
             
 
