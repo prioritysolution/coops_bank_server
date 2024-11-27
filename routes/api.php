@@ -108,6 +108,13 @@ Route::group([
     Route::get('/Org/GetFinancialYear/{org_id}',[UserLogin::class,'get_current_financial_year']);
     Route::get('/Org/GetUserDashboard/{org_id}',[UserLogin::class,'get_dashboard']);
     Route::post('/Org/GetDashboardItem',[UserLogin::class,'get_dashboard_item']);
+    Route::get('/Org/GetUserProfile',[UserLogin::class,'get_user_profile']);
+    Route::post('/Org/UpdateUserProfile',[UserLogin::class,'process_update_user_prof']);
+    Route::get('/Org/GetUserRole',[UserLogin::class,'get_user_role']);
+    Route::post('/Org/AddUser',[UserLogin::class,'process_org_user']);
+    Route::get('/Org/GetUserList',[UserLogin::class,'get_org_user_list']);
+    Route::get('/Org/GetModuleList',[UserLogin::class,'get_module_menue_list']);
+    Route::post('/Org/MapUserModule',[UserLogin::class,'process_map_user_module']);
     Route::post('/Org/User/ProcessLogOut',[UserLogin::class,'process_logout']);
 
     // login route end here
@@ -319,6 +326,10 @@ Route::group([
     Route::post('/Org/FinancialReporting/GenereateAcctLedger',[ProcessFinancialReport::class,'genereate_ledger']);
     Route::post('/Org/FinancialReporting/GetVoucherList',[ProcessFinancialReport::class,'get_voucher_list']);
     Route::get('/Org/FinancialReporting/GetVoucherDetails/{org_id}/{txn_id}',[ProcessFinancialReport::class,'get_voucher_details']);
+    Route::post('/Org/FinancialReporting/GenereateTrailBalance',[ProcessFinancialReport::class,'process_trail_balance']);
+    Route::post('/Org/FinancialReporting/GenereatePlAccount',[ProcessFinancialReport::class,'process_pl_account']);
+    Route::post('/Org/FinancialReporting/GenereatePlAppropriation',[ProcessFinancialReport::class,'process_pl_appropriation']);
+    Route::post('/Org/FinancialReporting/GenereateBalancesheet',[ProcessFinancialReport::class,'process_balancesheet']);
 
     // Financial Report Route End Here
 

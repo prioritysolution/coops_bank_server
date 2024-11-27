@@ -519,4 +519,242 @@ class ProcessFinancialReport extends Controller
             throw new HttpResponseException($response);
         }
     }
+
+    public function process_trail_balance(Request $request){
+        $validator = Validator::make($request->all(),[
+            'branch_id' => 'required',
+            'frm_date' => 'required',
+            'to_date'=> 'required',
+            'org_id' => 'required'
+        ]);
+
+        if($validator->passes()){
+
+            try {
+
+                $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+                if(!$sql){
+                  throw new Exception;
+                }
+                $org_schema = $sql[0]->db;
+                $db = Config::get('database.connections.mysql');
+                $db['database'] = $org_schema;
+                config()->set('database.connections.coops', $db);
+
+                $sql = DB::connection('coops')->select("Call USP_RPT_TRAIL_BALANCE(?,?,?);",[$request->frm_date,$request->to_date,$request->branch_id]);
+                
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
+                }
+
+                    return response()->json([
+                        'message' => 'Data Found',
+                        'details' => $sql,
+                    ],200);
+                
+
+            } catch (Exception $ex) {
+                
+                $response = response()->json([
+                    'message' => 'Error Found',
+                    'details' => $ex->getMessage(),
+                ],400);
+    
+                throw new HttpResponseException($response);
+            }
+        }
+        else{
+
+            $errors = $validator->errors();
+
+            $response = response()->json([
+                'message' => 'Invalid data send',
+                'details' => $errors->messages(),
+            ],400);
+        
+            throw new HttpResponseException($response);
+        }
+    }
+
+    public function process_pl_account(Request $request){
+        $validator = Validator::make($request->all(),[
+            'branch_id' => 'required',
+            'frm_date' => 'required',
+            'to_date'=> 'required',
+            'org_id' => 'required'
+        ]);
+
+        if($validator->passes()){
+
+            try {
+
+                $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+                if(!$sql){
+                  throw new Exception;
+                }
+                $org_schema = $sql[0]->db;
+                $db = Config::get('database.connections.mysql');
+                $db['database'] = $org_schema;
+                config()->set('database.connections.coops', $db);
+
+                $sql = DB::connection('coops')->select("Call USP_RPT_PL_ACCOUNT(?,?,?);",[$request->frm_date,$request->to_date,$request->branch_id]);
+                
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
+                }
+
+                    return response()->json([
+                        'message' => 'Data Found',
+                        'details' => $sql,
+                    ],200);
+                
+
+            } catch (Exception $ex) {
+                
+                $response = response()->json([
+                    'message' => 'Error Found',
+                    'details' => $ex->getMessage(),
+                ],400);
+    
+                throw new HttpResponseException($response);
+            }
+        }
+        else{
+
+            $errors = $validator->errors();
+
+            $response = response()->json([
+                'message' => 'Invalid data send',
+                'details' => $errors->messages(),
+            ],400);
+        
+            throw new HttpResponseException($response);
+        }
+    }
+
+    public function process_pl_appropriation(Request $request){
+        $validator = Validator::make($request->all(),[
+            'branch_id' => 'required',
+            'to_date'=> 'required',
+            'org_id' => 'required'
+        ]);
+
+        if($validator->passes()){
+
+            try {
+
+                $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+                if(!$sql){
+                  throw new Exception;
+                }
+                $org_schema = $sql[0]->db;
+                $db = Config::get('database.connections.mysql');
+                $db['database'] = $org_schema;
+                config()->set('database.connections.coops', $db);
+
+                $sql = DB::connection('coops')->select("Call USP_RPT_PL_APPROPRIATION(?,?);",[$request->to_date,$request->branch_id]);
+                
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
+                }
+
+                    return response()->json([
+                        'message' => 'Data Found',
+                        'details' => $sql,
+                    ],200);
+                
+
+            } catch (Exception $ex) {
+                
+                $response = response()->json([
+                    'message' => 'Error Found',
+                    'details' => $ex->getMessage(),
+                ],400);
+    
+                throw new HttpResponseException($response);
+            }
+        }
+        else{
+
+            $errors = $validator->errors();
+
+            $response = response()->json([
+                'message' => 'Invalid data send',
+                'details' => $errors->messages(),
+            ],400);
+        
+            throw new HttpResponseException($response);
+        }
+    }
+
+    public function process_balancesheet(Request $request){
+        $validator = Validator::make($request->all(),[
+            'branch_id' => 'required',
+            'to_date'=> 'required',
+            'org_id' => 'required'
+        ]);
+
+        if($validator->passes()){
+
+            try {
+
+                $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+                if(!$sql){
+                  throw new Exception;
+                }
+                $org_schema = $sql[0]->db;
+                $db = Config::get('database.connections.mysql');
+                $db['database'] = $org_schema;
+                config()->set('database.connections.coops', $db);
+
+                $sql = DB::connection('coops')->select("Call USP_RPT_BALANCESHEET(?,?);",[$request->to_date,$request->branch_id]);
+                
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
+                }
+
+                    return response()->json([
+                        'message' => 'Data Found',
+                        'details' => $sql,
+                    ],200);
+                
+
+            } catch (Exception $ex) {
+                
+                $response = response()->json([
+                    'message' => 'Error Found',
+                    'details' => $ex->getMessage(),
+                ],400);
+    
+                throw new HttpResponseException($response);
+            }
+        }
+        else{
+
+            $errors = $validator->errors();
+
+            $response = response()->json([
+                'message' => 'Invalid data send',
+                'details' => $errors->messages(),
+            ],400);
+        
+            throw new HttpResponseException($response);
+        } 
+    }
 }

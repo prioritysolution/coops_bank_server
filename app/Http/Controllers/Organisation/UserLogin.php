@@ -12,9 +12,21 @@ use Hash;
 use Exception;
 use Session;
 use DB;
+use \stdClass;
 
 class UserLogin extends Controller
 {
+    public function convertToObject($array) {
+        $object = new stdClass();
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                $value = $this->convertToObject($value);
+            }
+            $object->$key = $value;
+        }
+        return $object;
+    }
+
     public function process_user_login(Request $request){
         $validator = Validator::make($request->all(),[
             'email' =>'required|email',
@@ -139,6 +151,14 @@ class UserLogin extends Controller
         try {
             $result = DB::select("CALL USP_GET_ORG_USER_DASHBOARD(?, ?);", [$org_id, auth()->user()->Id]);
             
+            if (empty($result)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
+
             $menu_set = [];
             
             foreach ($result as $row) {
@@ -265,6 +285,311 @@ class UserLogin extends Controller
     ],400);
 
     throw new HttpResponseException($response);
+        }
+    }
+
+    public function get_user_profile(){
+        try {
+           
+            $sql = DB::select("Select m.Id,m.User_Name,m.User_Mail,m.User_Mob,r.Role_Name From mst_org_user m 
+                                Join org_user_role r On r.Id=m.User_Role
+                                Where m.Id=? And m.Is_Active=1",[auth()->user()->Id]);
+
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
+
+            
+                return response()->json([
+                    'message' => 'Data Found',
+                    'details' => $sql,
+                ],200);
+            
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        } 
+    }
+
+    public function process_update_user_prof(Request $request){
+        $validator = Validator::make($request->all(),[
+            'user_name' => 'required',
+            'user_mod' => 'required',
+            'user_pass' =>'required',
+            'confirm_password' => 'required_with:user_pass|same:user_pass'
+        ]);
+
+        if($validator->passes()){
+            try {
+                DB::beginTransaction();
+                $sql = DB::statement("Call USP_UPDATE_USER_PROF(?,?,?,?,@error,@messg);",[auth()->user()->Id,$request->user_name,$request->user_mod,Hash::make($request->user_pass)]);
+
+                if(!$sql){
+                    throw new Exception;
+                }
+
+                $result = DB::select("Select @error As Error_No,@messg As Message");
+                $error_No = $result[0]->Error_No;
+                $message = $result[0]->Message;
+
+                if($error_No<0){
+                    DB::rollBack(); 
+                    return response()->json([
+                        'message' => 'Error Found',
+                        'details' => $message,
+                    ],200);
+                }
+                else{
+                    DB::commit();
+                    return response()->json([
+                        'message' => 'Success',
+                        'details' => "User Password Successfully Changed !!",
+                    ],200);
+                }
+
+            } catch (Exception $ex) {
+                DB::rollBack(); 
+                $response = response()->json([
+                    'message' => 'Error Found',
+                    'details' => $ex->getMessage(),
+                ],400);
+    
+                throw new HttpResponseException($response);
+            }
+        }
+        else{
+            $errors = $validator->errors();
+
+            $response = response()->json([
+              'message' => 'Invalid data send',
+              'details' => $errors->messages(),
+          ],400);
+      
+          throw new HttpResponseException($response);
+        }
+    }
+
+    public function get_user_role(){
+        try {
+           
+            $sql = DB::select("Select Id,Role_Name From org_user_role");
+
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
+
+            
+                return response()->json([
+                    'message' => 'Data Found',
+                    'details' => $sql,
+                ],200);
+            
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        } 
+    }
+    
+    public function process_org_user(Request $request){
+        $validator = Validator::make($request->all(),[
+            'org_id' => 'required',
+            'branch_Id' => 'required',
+            'user_role' => 'required',
+            'user_name' => 'required',
+            'user_mail' => 'required',
+            'user_mod' => 'required',
+            'user_pass' =>'required',
+            'confirm_password' => 'required_with:user_pass|same:user_pass'
+        ]);
+
+        if($validator->passes()){
+            try {
+                DB::beginTransaction();
+                $sql = DB::statement("Call USP_POST_ORG_USER(?,?,?,?,?,?,?,?,@error,@messg);",[$request->org_id,$request->branch_Id,$request->user_role,$request->user_name,$request->user_mail,$request->user_mod,Hash::make($request->user_pass,auth()->user()->Id)]);
+
+                if(!$sql){
+                    throw new Exception;
+                }
+
+                $result = DB::select("Select @error As Error_No,@messg As Message");
+                $error_No = $result[0]->Error_No;
+                $message = $result[0]->Message;
+
+                if($error_No<0){
+                    DB::rollBack(); 
+                    return response()->json([
+                        'message' => 'Error Found',
+                        'details' => $message,
+                    ],200);
+                }
+                else{
+                    DB::commit();
+                    return response()->json([
+                        'message' => 'Success',
+                        'details' => "User Password Successfully Changed !!",
+                    ],200);
+                }
+
+            } catch (Exception $ex) {
+                DB::rollBack(); 
+                $response = response()->json([
+                    'message' => 'Error Found',
+                    'details' => $ex->getMessage(),
+                ],400);
+    
+                throw new HttpResponseException($response);
+            }
+        }
+        else{
+            $errors = $validator->errors();
+
+            $response = response()->json([
+              'message' => 'Invalid data send',
+              'details' => $errors->messages(),
+          ],400);
+      
+          throw new HttpResponseException($response);
+        } 
+    }
+
+    public function get_org_user_list(){
+        try {
+           
+            $sql = DB::select("Select Id,User_Mail From mst_org_user Where User_Role<>1");
+
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
+
+            
+                return response()->json([
+                    'message' => 'Data Found',
+                    'details' => $sql,
+                ],200);
+            
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
+
+    public function get_module_menue_list(){
+        try {
+            $module = DB::select("Select Id,Sub_Mod_Name From mst_org_sub_module Where Is_Active=1 And Id<>13 Order By Sl Asc;");
+            $menue_set = [];
+
+            foreach ($module as $module_key) {
+                $sub_m = DB::select("Select Id,Sub_Mod_Id,Menue_Name From mst_org_module_menue Where Sub_Mod_Id=? And Is_Active=? Order By Sl Asc;",[$module_key->Id,1]);
+                $menue_set [] = ["Module_Id"=>$module_key->Id,"Module_Name"=>$module_key->Sub_Mod_Name,"childLinks"=>$sub_m];
+            }
+            return response()->json([
+                'message' =>'Data Found',
+                'Data' => $menue_set
+            ],200);
+
+        } catch (Exception $ex) {
+           $response = response()->json([
+                    'message' => 'Error Found',
+                    'details' => $ex->getMessage(),
+                ],400);
+    
+                throw new HttpResponseException($response);
+        }
+    }
+
+    public function process_map_user_module(Request $request){
+        $validator = Validator::make($request->all(),[
+            'user_id' =>'required',
+            'org_id' => 'required',
+            'module_array' => 'required'
+        ]);
+        if($validator->passes()){
+            try {
+
+                DB::beginTransaction();
+
+                $module_list = $this->convertToObject($request->module_array);
+                $drop_table = DB::statement("Drop Temporary Table If Exists TempModuleList;");
+                $create_tabl = DB::statement("Create Temporary Table TempModuleList
+                                        (
+                                            module_Id				Int,
+                                            menue_Id				Int
+                                        );");
+                foreach ($module_list as $module) {
+                   DB::statement("Insert Into TempModuleList (module_Id,menue_Id) Values (?,?);",[$module->module_id,$module->menue_id]);
+                }
+
+                $sql = DB::statement("Call USP_MAP_ORG_USER_MENUE(?,?,?,@error,@messg);",[$request->org_id,$request->user_id,auth()->user()->Id]);
+
+                if(!$sql){
+                    throw new Exception;
+                }
+
+                $result = DB::select("Select @error As Error_No,@messg As Message");
+                $error_No = $result[0]->Error_No;
+                $message = $result[0]->Message;
+
+                if($error_No<0){
+                    DB::rollBack(); 
+                    return response()->json([
+                        'message' => 'Error Found',
+                        'details' => $message,
+                    ],200);
+                }
+                else{
+                    DB::commit();
+                    return response()->json([
+                        'message' => 'Success',
+                        'details' => "User Module Maped Successfully !!",
+                    ],200);
+                }
+
+            } catch (Exception $ex) {
+                DB::rollBack(); 
+                $response = response()->json([
+                    'message' => 'Error Found',
+                    'details' => $ex->getMessage(),
+                ],400);
+    
+                throw new HttpResponseException($response);
+            }
+        }
+        else{
+            $errors = $validator->errors();
+
+            $response = response()->json([
+              'message' => 'Invalid data send',
+              'details' => $errors->messages(),
+          ],400);
+      
+          throw new HttpResponseException($response);
         }
     }
 } 
