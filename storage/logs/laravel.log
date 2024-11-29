@@ -9171,3 +9171,63 @@ Did you mean one of these?
 #40 /var/www/html/laravel/CoopsBank/artisan(37): Illuminate\\Foundation\\Console\\Kernel->handle()
 #41 {main}
 "} 
+[2024-11-29 08:54:28] local.ERROR: Mail sending failed: Undefined variable $data  
+[2024-11-29 08:57:13] local.ERROR: Mail sending failed: View [view.name] not found.  
+[2024-11-29 09:34:54] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com OTP For Forgot Password Of You Account OTP Is : 229274] not found.  
+[2024-11-29 09:36:28] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com OTP For Forgot Password Of You Account OTP Is : 494373] not found.  
+[2024-11-29 09:37:47] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com OTP For Forgot Password Of You Account OTP Is : 454296] not found.  
+[2024-11-29 09:39:21] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 969082] not found.  
+[2024-11-29 09:40:00] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 851060] not found.  
+[2024-11-29 09:42:34] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 178676] not found.  
+[2024-11-29 09:44:39] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 320923] not found.  
+[2024-11-29 09:46:53] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 237127] not found.  
+[2024-11-29 09:48:54] local.ERROR: Mail sending failed: View [<p>This is a test email with raw HTML content.<.p>] not found.  
+[2024-11-29 09:50:58] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 136772] not found.  
+[2024-11-29 09:52:41] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 891942] not found.  
+[2024-11-29 09:53:29] local.DEBUG: From: PrioBank <otp@prioritysolutions.in>
+To: test@example.com
+Subject: Test
+MIME-Version: 1.0
+Date: Fri, 29 Nov 2024 09:53:29 +0000
+Message-ID: <b093994bf4f671466002e1a77ebba284@prioritysolutions.in>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Test email  
+[2024-11-29 09:54:18] local.DEBUG: From: PrioBank <otp@prioritysolutions.in>
+To: surojitpolley002@gmail.com
+Subject: Test
+MIME-Version: 1.0
+Date: Fri, 29 Nov 2024 09:54:18 +0000
+Message-ID: <8f690eb5efaf53f9cf2305da03b5abde@prioritysolutions.in>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Test email  
+[2024-11-29 09:58:16] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 180014] not found.  
+[2024-11-29 09:59:31] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 204967] not found.  
+[2024-11-29 10:04:31] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 123456] not found.  
+[2024-11-29 10:05:01] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 123456] not found.  
+[2024-11-29 10:05:20] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 123456] not found.  
+[2024-11-29 10:36:44] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 123456] not found.  
+[2024-11-29 11:08:52] local.INFO: Email Data:  {"subject":"OTP For Forgot Password","message":"Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 312896"} 
+[2024-11-29 11:08:52] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 312896] not found.  
+[2024-11-29 11:09:53] local.INFO: Email Data:  {"subject":"OTP For Forgot Password","message":"Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 121972"} 
+[2024-11-29 11:09:53] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 121972] not found.  
+[2024-11-29 11:13:01] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 474417] not found.  
+[2024-11-29 11:14:18] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 123456] not found.  
+[2024-11-29 11:19:42] local.INFO: Sending email with subject:   
+[2024-11-29 11:19:42] local.INFO: Message body:   
+[2024-11-29 11:19:42] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 123456] not found.  
+[2024-11-29 11:20:36] local.INFO: Sending email with subject:   
+[2024-11-29 11:20:36] local.INFO: Message body:   
+[2024-11-29 11:20:36] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 123456] not found.  
+[2024-11-29 11:22:49] local.INFO: Sending email with subject:   
+[2024-11-29 11:22:49] local.INFO: Message body:   
+[2024-11-29 11:22:49] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 123456] not found.  
+[2024-11-29 11:24:31] local.INFO: Sending email with subject: OTP For Forgot Password  
+[2024-11-29 11:24:31] local.INFO: Message body: Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 123456  
+[2024-11-29 11:24:31] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 123456] not found.  
+[2024-11-29 11:30:40] local.INFO: Sending email with subject: OTP For Forgot Password  
+[2024-11-29 11:30:40] local.INFO: Message body: Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 123456  
+[2024-11-29 11:30:40] local.ERROR: Mail sending failed: View [Dear surojitpolley002@gmail.com, OTP for Forgot Password of your account is: 123456] not found.  

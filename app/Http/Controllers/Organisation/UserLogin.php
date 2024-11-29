@@ -13,9 +13,11 @@ use Exception;
 use Session;
 use DB;
 use \stdClass;
+use App\Traits\SendMail;
 
 class UserLogin extends Controller
 {
+    use SendMail;
     public function convertToObject($array) {
         $object = new stdClass();
         foreach ($array as $key => $value) {
@@ -590,6 +592,54 @@ class UserLogin extends Controller
           ],400);
       
           throw new HttpResponseException($response);
+        }
+    }
+
+    public function process_user_otp(String $mailid,Int $otpfor){
+        try {
+           
+            $sql = DB::select("Select UDF_USEROTP(?,?,?) As OTP;",[$mailid,null,1]);
+
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
+
+            $otp = $sql[0]->OTP;
+            if($otp<0){
+                return response()->json([
+                    'message' => 'Error Found',
+                    'details' => 'User Dosenot Exists !!',
+                ],200);
+            }
+            else{
+                $success = $this->otp_send($mailid,$otp,$otpfor);
+                if($success){
+                    return response()->json([
+                        'message' => 'Success',
+                        'details' => 'OTP Successfully Sent To Your Mail Id.',
+                    ],200); 
+                }
+                else{
+                    return response()->json([
+                        'message' => 'Success',
+                        'details' => 'Unable To Send OTP To Your Mail !!',
+                    ],200); 
+                }
+                
+            }
+            
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
         }
     }
 } 

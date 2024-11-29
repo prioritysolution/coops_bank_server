@@ -99,6 +99,7 @@ Route::group([
 // user route here
 
 Route::post('/user/login',[UserLogin::class,'process_user_login'])->middleware('api_access');
+Route::get('/Org/GenereateOTP/{mailid}/{otpfor}',[UserLogin::class,'process_user_otp'])->middleware('api_access');
 
 Route::group([
     'middleware' => ['auth:sanctum',]
