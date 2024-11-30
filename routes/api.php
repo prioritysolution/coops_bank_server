@@ -100,6 +100,9 @@ Route::group([
 
 Route::post('/user/login',[UserLogin::class,'process_user_login'])->middleware('api_access');
 Route::get('/Org/GenereateOTP/{mailid}/{otpfor}',[UserLogin::class,'process_user_otp'])->middleware('api_access');
+Route::get('/Org/VerifyOTP/{otp}/{mailid}',[UserLogin::class,'process_otp_verify'])->middleware('api_access');
+Route::post('/Org/ForgotPassword',[UserLogin::class,'process_forgot_password'])->middleware('api_access');
+Route::post('/Org/TerminateActiveSession',[UserLogin::class,'process_terminate_session']);
 
 Route::group([
     'middleware' => ['auth:sanctum',]
@@ -113,7 +116,8 @@ Route::group([
     Route::post('/Org/UpdateUserProfile',[UserLogin::class,'process_update_user_prof']);
     Route::get('/Org/GetUserRole',[UserLogin::class,'get_user_role']);
     Route::post('/Org/AddUser',[UserLogin::class,'process_org_user']);
-    Route::get('/Org/GetUserList',[UserLogin::class,'get_org_user_list']);
+    Route::get('/Org/GetUserList/{org_id}',[UserLogin::class,'get_org_user_list']);
+    Route::get('/Org/GetAllUserList/{org_id}',[UserLogin::class,'get_org_all_user_list']);
     Route::get('/Org/GetModuleList',[UserLogin::class,'get_module_menue_list']);
     Route::post('/Org/MapUserModule',[UserLogin::class,'process_map_user_module']);
     Route::post('/Org/User/ProcessLogOut',[UserLogin::class,'process_logout']);
@@ -262,6 +266,8 @@ Route::group([
     Route::get('/Org/ProcessVoucherEntry/GetSubLedger/{org_id}/{gl_id}',[ProcessVoucherEntry::class,'get_sub_ledger_list']);
     Route::post('/Org/ProcessVoucherEntry/GetSubLedgerBalance',[ProcessVoucherEntry::class,'get_subledger_balance']);
     Route::post('/Org/ProcessVoucherEntry/PostVoucher',[ProcessVoucherEntry::class,'process_voucher_posting']);
+    Route::get('/Org/ProcessVoucherEntry/GetAdjLedgerList',[ProcessVoucherEntry::class,'get_adj_ledger_list']);
+    Route::post('/Org/ProcessVoucherEntry/PostAdjVoucher',[ProcessVoucherEntry::class,'process_adj_voucher']);
 
     // Voucher Entry Route End Here
 

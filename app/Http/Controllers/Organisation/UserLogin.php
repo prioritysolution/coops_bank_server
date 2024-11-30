@@ -417,7 +417,7 @@ class UserLogin extends Controller
             'user_role' => 'required',
             'user_name' => 'required',
             'user_mail' => 'required',
-            'user_mod' => 'required',
+            'user_mob' => 'required',
             'user_pass' =>'required',
             'confirm_password' => 'required_with:user_pass|same:user_pass'
         ]);
@@ -425,7 +425,7 @@ class UserLogin extends Controller
         if($validator->passes()){
             try {
                 DB::beginTransaction();
-                $sql = DB::statement("Call USP_POST_ORG_USER(?,?,?,?,?,?,?,?,@error,@messg);",[$request->org_id,$request->branch_Id,$request->user_role,$request->user_name,$request->user_mail,$request->user_mod,Hash::make($request->user_pass,auth()->user()->Id)]);
+                $sql = DB::statement("Call USP_POST_ORG_USER(?,?,?,?,?,?,?,?,@error,@messg);",[$request->org_id,$request->branch_Id,$request->user_role,$request->user_name,$request->user_mail,$request->user_mob,Hash::make($request->user_pass,auth()->user()->Id)]);
 
                 if(!$sql){
                     throw new Exception;
@@ -446,7 +446,7 @@ class UserLogin extends Controller
                     DB::commit();
                     return response()->json([
                         'message' => 'Success',
-                        'details' => "User Password Successfully Changed !!",
+                        'details' => "User Successfully Added !!",
                     ],200);
                 }
 
@@ -472,10 +472,10 @@ class UserLogin extends Controller
         } 
     }
 
-    public function get_org_user_list(){
+    public function get_org_user_list(Int $org_id){
         try {
            
-            $sql = DB::select("Select Id,User_Mail From mst_org_user Where User_Role<>1");
+            $sql = DB::select("Select Id,User_Mail From mst_org_user Where User_Role<>1 And Org_Id=?",[$org_id]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -486,6 +486,37 @@ class UserLogin extends Controller
             }
 
             
+                return response()->json([
+                    'message' => 'Data Found',
+                    'details' => $sql,
+                ],200);
+            
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
+
+    public function get_org_all_user_list(Int $org_id){
+        try {
+           
+            $sql = DB::select("Select m.Id,m.User_Name,m.User_Mail,m.User_Mob,r.Role_Name From mst_org_user m 
+                                Join org_user_role r On r.Id=m.User_Role
+                                Where m.Is_Active=1 And Org_Id=?",[$org_id]);
+
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
+
                 return response()->json([
                     'message' => 'Data Found',
                     'details' => $sql,
@@ -641,5 +672,156 @@ class UserLogin extends Controller
 
             throw new HttpResponseException($response);
         }
+    }
+
+    public function process_otp_verify(Int $otp,String $mailid){
+        try {
+           
+            $sql = DB::select("Select UDF_USEROTP(?,?,?) As OTP;",[$mailid,$otp,2]);
+
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
+
+            $otp = $sql[0]->OTP;
+            if($otp<0){
+                return response()->json([
+                    'message' => 'Error Found',
+                    'details' => 'Invalid OTP Provide !!',
+                ],200);
+            }
+            else{                
+                    return response()->json([
+                        'message' => 'Success',
+                        'details' => 'OTP Verified Successfully !!',
+                    ],200); 
+            }
+            
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
+
+    public function process_forgot_password(Request $request){
+        $validator = Validator::make($request->all(),[
+            'user_mail' => 'required',
+            'user_pass' =>'required',
+            'confirm_password' => 'required_with:user_pass|same:user_pass'
+        ]);
+
+        if($validator->passes()){
+            try {
+                DB::beginTransaction();
+                $sql = DB::statement("Call USP_ORG_USER_CHANGE_PASSWORD(?,?,@error,@messg);",[$request->user_mail,Hash::make($request->user_pass)]);
+
+                if(!$sql){
+                    throw new Exception;
+                }
+
+                $result = DB::select("Select @error As Error_No,@messg As Message");
+                $error_No = $result[0]->Error_No;
+                $message = $result[0]->Message;
+
+                if($error_No<0){
+                    DB::rollBack(); 
+                    return response()->json([
+                        'message' => 'Error Found',
+                        'details' => $message,
+                    ],200);
+                }
+                else{
+                    DB::commit();
+                    return response()->json([
+                        'message' => 'Success',
+                        'details' => $message,
+                    ],200);
+                }
+
+            } catch (Exception $ex) {
+                DB::rollBack(); 
+                $response = response()->json([
+                    'message' => 'Error Found',
+                    'details' => $ex->getMessage(),
+                ],400);
+    
+                throw new HttpResponseException($response);
+            }
+        }
+        else{
+            $errors = $validator->errors();
+
+            $response = response()->json([
+              'message' => 'Invalid data send',
+              'details' => $errors->messages(),
+          ],400);
+      
+          throw new HttpResponseException($response);
+        } 
+    }
+
+    public function process_terminate_session(Request $request){
+        $validator = Validator::make($request->all(),[
+            'user_mail' => 'required',
+            'user_otp' =>'required',
+        ]);
+
+        if($validator->passes()){
+            try {
+                DB::beginTransaction();
+                $sql = DB::statement("Call USP_TERMINATE_ORG_USER_LOG(?,?,@error,@messg);",[$request->user_mail,$request->user_otp]);
+
+                if(!$sql){
+                    throw new Exception;
+                }
+
+                $result = DB::select("Select @error As Error_No,@messg As Message");
+                $error_No = $result[0]->Error_No;
+                $message = $result[0]->Message;
+
+                if($error_No<0){
+                    DB::rollBack(); 
+                    return response()->json([
+                        'message' => 'Error Found',
+                        'details' => $message,
+                    ],200);
+                }
+                else{
+                    DB::commit();
+                    return response()->json([
+                        'message' => 'Success',
+                        'details' => $message,
+                    ],200);
+                }
+
+            } catch (Exception $ex) {
+                DB::rollBack(); 
+                $response = response()->json([
+                    'message' => 'Error Found',
+                    'details' => $ex->getMessage(),
+                ],400);
+    
+                throw new HttpResponseException($response);
+            }
+        }
+        else{
+            $errors = $validator->errors();
+
+            $response = response()->json([
+              'message' => 'Invalid data send',
+              'details' => $errors->messages(),
+          ],400);
+      
+          throw new HttpResponseException($response);
+        } 
     }
 } 

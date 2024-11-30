@@ -31,7 +31,7 @@ class ProcessVoucherEntry extends Controller
     public function get_ledger_list(){
         try {
            
-            $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Id<>2 Order By Sub_Head;");
+            $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Sub_Head Not In (4,12,13,14,15,16,25,22,28) Order By Sub_Head;");
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -214,6 +214,122 @@ class ProcessVoucherEntry extends Controller
                 }
                 
                 $sql = DB::connection('coops')->statement("Call USP_ADD_VOUCHER(?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->vouch_type,$request->narration,$request->manual_vouch_no,$request->amount,$request->fin_id,$request->branch_id,auth()->user()->Id]);
+                
+                if(!$sql){
+                    throw new Exception('Operation Error !!');
+                }
+
+                $sql = DB::connection('coops')->select("Select @error As Error,@message As Message");
+                $error_No = $sql[0]->Error;
+                $message = $sql[0]->Message;
+
+                if($error_No<0){
+                    DB::connection('coops')->rollBack();
+                    return response()->json([
+                        'message' => 'Error Found',
+                        'details' => $message,
+                    ],200);
+                }
+                else{
+                    DB::connection('coops')->commit();
+                    return response()->json([
+                        'message' => 'Success',
+                        'details' => $message,
+                    ],200);
+                }
+
+            } catch (Exception $ex) {
+                DB::connection('coops')->rollBack();
+                $response = response()->json([
+                    'message' => 'Error Found',
+                    'details' => $ex->getMessage(),
+                ],400);
+    
+                throw new HttpResponseException($response);
+            }
+        }
+        else{
+
+            $errors = $validator->errors();
+
+            $response = response()->json([
+                'message' => 'Invalid data send',
+                'details' => $errors->messages(),
+            ],400);
+        
+            throw new HttpResponseException($response);
+        }
+    }
+
+    public function get_adj_ledger_list(){
+        try {
+           
+            $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Sub_Head Not In (4,12,25) Order By Sub_Head;");
+
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
+
+                return response()->json([
+                    'message' => 'Data Found',
+                    'details' => $sql,
+                ],200); 
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        } 
+    }
+
+    public function process_adj_voucher(Request $request){
+        $validator = Validator::make($request->all(),[
+            'trans_date' => 'required',
+            'narration' => 'required',
+            'manual_vouch_no' => 'required',
+            'fin_id' => 'required',
+            'branch_id' => 'required',
+            'vouch_data' => 'required',
+            'org_id' => 'required'
+        ]);
+
+        if($validator->passes()){
+
+            try {
+
+                $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+                if(!$sql){
+                  throw new Exception;
+                }
+                $org_schema = $sql[0]->db;
+                $db = Config::get('database.connections.mysql');
+                $db['database'] = $org_schema;
+                config()->set('database.connections.coops', $db);
+                DB::connection('coops')->beginTransaction();
+
+                $vouch_details_drop_table = DB::connection('coops')->statement("Drop Temporary Table If Exists tempdetails;");
+                $vouch_details_create_table = DB::connection('coops')->statement("Create Temporary Table tempdetails
+                                                                                (
+                                                                                   Gl_Id			Int,
+                                                                                   Trans_Type		Char(1),
+                                                                                   Amount			Numeric(18,2)
+                                                                                );");
+                if(is_array($request->vouch_data)){
+                    $vouch_data = $this->convertToObject($request->vouch_data);
+                    foreach ($vouch_data as $vouch_details) {
+                        DB::connection('coops')->statement("Insert Into tempdetails (Gl_Id,Trans_Type,Amount) Values (?,?,?);",[$vouch_details->gl,$vouch_details->drCr,$vouch_details->amount]);
+                    }
+                    
+                }
+                
+                $sql = DB::connection('coops')->statement("Call USP_POST_ADJ_VOUCHER(?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->manual_vouch_no,$request->narration,$request->fin_id,auth()->user()->Id,$request->branch_id]);
                 
                 if(!$sql){
                     throw new Exception('Operation Error !!');
