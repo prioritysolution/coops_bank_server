@@ -489,6 +489,7 @@ class ProcessLoan extends Controller
             'mem_id' => 'required',
             'appl_no' => 'required',
             'ref_ac_no' => 'required',
+            'ledg_folio' => 'required',
             'prod_id' => 'required',
             'roi' => 'required',
             'duration' => 'required',
@@ -510,7 +511,7 @@ class ProcessLoan extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
 
-            $sql = DB::connection('coops')->statement("Call USP_LOAN_ADD_APPLICATION(?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->appl_date,$request->mem_id,$request->appl_no,$request->ref_ac_no,$request->prod_id,$request->roi,$request->duration,$request->dur_unit,$request->appl_amount,$request->repay_mode,$request->repay_within,auth()->user()->Id,$request->branch_Id]);
+            $sql = DB::connection('coops')->statement("Call USP_LOAN_ADD_APPLICATION(?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->appl_date,$request->mem_id,$request->appl_no,$request->ref_ac_no,$request->ledg_folio,$request->prod_id,$request->roi,$request->duration,$request->dur_unit,$request->appl_amount,$request->repay_mode,$request->repay_within,auth()->user()->Id,$request->branch_Id]);
 
             if(!$sql){
                 throw new Exception('Operation Error Found !!');

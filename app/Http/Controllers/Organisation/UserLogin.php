@@ -323,17 +323,10 @@ class UserLogin extends Controller
     }
 
     public function process_update_user_prof(Request $request){
-        $validator = Validator::make($request->all(),[
-            'user_name' => 'required',
-            'user_mod' => 'required',
-            'user_pass' =>'required',
-            'confirm_password' => 'required_with:user_pass|same:user_pass'
-        ]);
 
-        if($validator->passes()){
             try {
                 DB::beginTransaction();
-                $sql = DB::statement("Call USP_UPDATE_USER_PROF(?,?,?,?,@error,@messg);",[auth()->user()->Id,$request->user_name,$request->user_mod,Hash::make($request->user_pass)]);
+                $sql = DB::statement("Call USP_UPDATE_USER_PROF(?,?,?,?,@error,@messg);",[auth()->user()->Id,$request->user_name,$request->user_mob,Hash::make($request->user_pass)]);
 
                 if(!$sql){
                     throw new Exception;
@@ -354,7 +347,7 @@ class UserLogin extends Controller
                     DB::commit();
                     return response()->json([
                         'message' => 'Success',
-                        'details' => "User Password Successfully Changed !!",
+                        'details' => "User Profile Successfully Updated !!",
                     ],200);
                 }
 
@@ -367,17 +360,6 @@ class UserLogin extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-            $errors = $validator->errors();
-
-            $response = response()->json([
-              'message' => 'Invalid data send',
-              'details' => $errors->messages(),
-          ],400);
-      
-          throw new HttpResponseException($response);
-        }
     }
 
     public function get_user_role(){
@@ -425,7 +407,7 @@ class UserLogin extends Controller
         if($validator->passes()){
             try {
                 DB::beginTransaction();
-                $sql = DB::statement("Call USP_POST_ORG_USER(?,?,?,?,?,?,?,?,@error,@messg);",[$request->org_id,$request->branch_Id,$request->user_role,$request->user_name,$request->user_mail,$request->user_mob,Hash::make($request->user_pass,auth()->user()->Id)]);
+                $sql = DB::statement("Call USP_POST_ORG_USER(?,?,?,?,?,?,?,?,@error,@messg);",[$request->org_id,$request->branch_Id,$request->user_role,$request->user_name,$request->user_mail,$request->user_mob,Hash::make($request->user_pass),auth()->user()->Id]);
 
                 if(!$sql){
                     throw new Exception;
@@ -533,13 +515,19 @@ class UserLogin extends Controller
         }
     }
 
-    public function get_module_menue_list(){
+    public function get_module_menue_list(Int $org_id){
         try {
-            $module = DB::select("Select Id,Sub_Mod_Name From mst_org_sub_module Where Is_Active=1 And Id<>13 Order By Sl Asc;");
+            $module = DB::select("Select Id,Sub_Mod_Name From mst_org_sub_module Where Is_Active=1 And Id<>13 And Module_Id In(SELECT Module_Id FROM map_orgwise_module WHERE Org_Id =? And Is_Active=1) Order By Sl Asc;",[$org_id]);
             $menue_set = [];
-
+            $config_check = DB::select("Select Is_Demand From mst_org_config Where Org_Id=?",[$org_id]);
             foreach ($module as $module_key) {
-                $sub_m = DB::select("Select Id,Sub_Mod_Id,Menue_Name From mst_org_module_menue Where Sub_Mod_Id=? And Is_Active=? Order By Sl Asc;",[$module_key->Id,1]);
+                if($config_check[0]->Is_Demand===0){
+                    $sub_m = DB::select("Select Id,Sub_Mod_Id,Menue_Name From mst_org_module_menue Where Sub_Mod_Id=? And Is_Active=? And Id Not in (40,65) Order By Sl Asc;",[$module_key->Id,1]);
+                }
+                else{
+                    $sub_m = DB::select("Select Id,Sub_Mod_Id,Menue_Name From mst_org_module_menue Where Sub_Mod_Id=? And Is_Active=? Order By Sl Asc;",[$module_key->Id,1]);
+                }
+                
                 $menue_set [] = ["Module_Id"=>$module_key->Id,"Module_Name"=>$module_key->Sub_Mod_Name,"childLinks"=>$sub_m];
             }
             return response()->json([

@@ -113,12 +113,12 @@ Route::group([
     Route::get('/Org/GetUserDashboard/{org_id}',[UserLogin::class,'get_dashboard']);
     Route::post('/Org/GetDashboardItem',[UserLogin::class,'get_dashboard_item']);
     Route::get('/Org/GetUserProfile',[UserLogin::class,'get_user_profile']);
-    Route::post('/Org/UpdateUserProfile',[UserLogin::class,'process_update_user_prof']);
+    Route::put('/Org/UpdateUserProfile',[UserLogin::class,'process_update_user_prof']);
     Route::get('/Org/GetUserRole',[UserLogin::class,'get_user_role']);
     Route::post('/Org/AddUser',[UserLogin::class,'process_org_user']);
     Route::get('/Org/GetUserList/{org_id}',[UserLogin::class,'get_org_user_list']);
     Route::get('/Org/GetAllUserList/{org_id}',[UserLogin::class,'get_org_all_user_list']);
-    Route::get('/Org/GetModuleList',[UserLogin::class,'get_module_menue_list']);
+    Route::get('/Org/GetModuleList/{org_id}',[UserLogin::class,'get_module_menue_list']);
     Route::post('/Org/MapUserModule',[UserLogin::class,'process_map_user_module']);
     Route::post('/Org/User/ProcessLogOut',[UserLogin::class,'process_logout']);
 
