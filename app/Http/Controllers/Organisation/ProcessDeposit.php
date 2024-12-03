@@ -596,8 +596,9 @@ class ProcessDeposit extends Controller
                 $is_int_payout = $request->input('is_int_payout') === 'null' ? null : $request->input('is_int_payout');
                 $agent_id = $request->input('agent_id') === 'null' ? null : $request->input('agent_id');
                 $proi = $request->input('proi') === 'null' ? null : $request->input('proi');
+                $pref_vouch = $request->input('ref_vouch') === 'null' ? null : $request->input('ref_vouch');
 
-                $sql = DB::connection('coops')->statement("Call USP_ADD_DEPOSIT_ACCOUNT(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->member_id,$request->ref_ac_no,$request->ledg_folio,$request->open_date,$request->prod_type,$request->dep_type,$request->prod_id,$request->oper_mode,$proi,$request->pamount,$duration,$dur_unit,$matur_ins,$matur_date,$matur_amt,$request->nom_name,$request->nom_rel,$request->nom_add,$request->nom_age,$joint_hld1,$joint_hld2,$request->ecs_avail,$ecs_ac_id,$is_int_payout,$pay_mode,$pay_amt,$cbs_ac_no,$agent_id,$sb_id,$bank_id,$imageName,$singname,$request->branch_id,$request->fin_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_ADD_DEPOSIT_ACCOUNT(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->member_id,$request->ref_ac_no,$request->ledg_folio,$request->open_date,$pref_vouch,$request->prod_type,$request->dep_type,$request->prod_id,$request->oper_mode,$proi,$request->pamount,$duration,$dur_unit,$matur_ins,$matur_date,$matur_amt,$request->nom_name,$request->nom_rel,$request->nom_add,$request->nom_age,$joint_hld1,$joint_hld2,$request->ecs_avail,$ecs_ac_id,$is_int_payout,$pay_mode,$pay_amt,$cbs_ac_no,$agent_id,$sb_id,$bank_id,$imageName,$singname,$request->branch_id,$request->fin_id,auth()->user()->Id]);
 
 
                 if(!$sql){
@@ -790,7 +791,7 @@ class ProcessDeposit extends Controller
            
                 
 
-                $sql = DB::connection('coops')->statement("Call USP_ADD_DEP_RECEIPT_PAYMENT(?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->account_id,$request->member_id,$request->trans_date,$request->pamount,$request->fine_amt,$request->sb_id,$request->bank_id,1,$request->branch_id,$request->fin_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_ADD_DEP_RECEIPT_PAYMENT(?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->account_id,$request->member_id,$request->trans_date,$request->ref_vouch,$request->pamount,$request->fine_amt,$request->sb_id,$request->bank_id,1,$request->branch_id,$request->fin_id,auth()->user()->Id]);
 
 
                 if(!$sql){
@@ -883,7 +884,7 @@ class ProcessDeposit extends Controller
                 }
            
 
-                $sql = DB::connection('coops')->statement("Call USP_ADD_DEP_RECEIPT_PAYMENT(?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->account_id,$request->member_id,$request->trans_date,$request->pamount,0,$request->sb_id,$request->bank_id,2,$request->branch_id,$request->fin_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_ADD_DEP_RECEIPT_PAYMENT(?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->account_id,$request->member_id,$request->trans_date,$request->ref_vouch,$request->pamount,0,$request->sb_id,$request->bank_id,2,$request->branch_id,$request->fin_id,auth()->user()->Id]);
 
 
                 if(!$sql){
@@ -1208,7 +1209,7 @@ class ProcessDeposit extends Controller
                 }
            
 
-                $sql = DB::connection('coops')->statement("Call USP_POST_DEP_ACCOUNT_CLOSE(?,?,?,?,?,?,?,?,?,@error,@message);",[$request->account_id,$request->member_id,$request->trans_date,$request->intt_amt,$request->sb_id,$request->bank_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_POST_DEP_ACCOUNT_CLOSE(?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->account_id,$request->member_id,$request->trans_date,$request->ref_vouch,$request->intt_amt,$request->sb_id,$request->bank_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
 
 
                 if(!$sql){
@@ -1427,7 +1428,7 @@ class ProcessDeposit extends Controller
                 }
            
 
-                $sql = DB::connection('coops')->statement("Call USP_ADD_DEP_MATURE(?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->account_id,$request->member_id,$request->principal_amt,$request->intt_amt,$request->bonus_amt,$request->bonus_rate,$request->sb_id,$request->bank_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_ADD_DEP_MATURE(?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->ref_vouch,$request->account_id,$request->member_id,$request->principal_amt,$request->intt_amt,$request->bonus_amt,$request->bonus_rate,$request->sb_id,$request->bank_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
 
 
                 if(!$sql){
@@ -1510,7 +1511,7 @@ class ProcessDeposit extends Controller
 
                 DB::connection('coops')->beginTransaction();
            
-                $sql = DB::connection('coops')->statement("Call USP_ADD_DEP_RENEWAL(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->account_id,$request->member_id,$request->principal_amt,$request->intt_amt,$request->pay_amt,$request->roi,$request->matur_val,$request->duration,$request->dur_unit,$request->mature_date,$request->sb_id,$request->bank_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_ADD_DEP_RENEWAL(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->ref_vouch,$request->account_id,$request->member_id,$request->principal_amt,$request->intt_amt,$request->pay_amt,$request->roi,$request->matur_val,$request->duration,$request->dur_unit,$request->mature_date,$request->sb_id,$request->bank_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
 
                 if(!$sql){
                     throw new Exception('Operation Error Found !!');
@@ -1662,7 +1663,7 @@ class ProcessDeposit extends Controller
                     }
                 }
 
-                $sql = DB::connection('coops')->statement("Call USP_DEP_POST_BLK_PAYOUT(?,?,?,?,@error,@message);",[$request->trans_date,$request->fin_id,$request->branch_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_DEP_POST_BLK_PAYOUT(?,?,?,?,?,@error,@message);",[$request->trans_date,$request->ref_vouch,$request->fin_id,$request->branch_id,auth()->user()->Id]);
 
 
                 if(!$sql){
@@ -1771,7 +1772,7 @@ class ProcessDeposit extends Controller
                     }
                 }
 
-                $sql = DB::connection('coops')->statement("Call USP_DEP_POST_SINGLE_PAYOUT(?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->acct_id,$request->sb_id,$request->bank_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_DEP_POST_SINGLE_PAYOUT(?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->ref_vouch,$request->acct_id,$request->sb_id,$request->bank_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
 
 
                 if(!$sql){

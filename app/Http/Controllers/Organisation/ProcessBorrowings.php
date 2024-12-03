@@ -163,7 +163,7 @@ class ProcessBorrowings extends Controller
 
                 DB::connection('coops')->beginTransaction();
 
-                $sql = DB::connection('coops')->statement("Call USP_BORROW_ADD_ACCOUNT(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->prod_name,$request->prod_type,$request->repay_mode,$request->bank_name,$request->acct_no,$request->disb_date,$request->amount,$request->roi,$request->over_rate,$request->duration,$request->due_date,$request->prn_ledg,$request->intt_ledg,$request->bank_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_BORROW_ADD_ACCOUNT(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->ref_vouch,$request->prod_name,$request->prod_type,$request->repay_mode,$request->bank_name,$request->acct_no,$request->disb_date,$request->amount,$request->roi,$request->over_rate,$request->duration,$request->due_date,$request->prn_ledg,$request->intt_ledg,$request->bank_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
 
 
                 if(!$sql){
@@ -333,7 +333,7 @@ class ProcessBorrowings extends Controller
 
                 DB::connection('coops')->beginTransaction();
 
-                $sql = DB::connection('coops')->statement("Call USP_BORROW_ADD_DISBURSE(?,?,?,?,?,?,?,?,@error,@message);",[$request->borrow_id,$request->disb_date,$request->disb_amt,$request->bank_id,$request->prn_ledg,$request->fin_id,$request->branch_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_BORROW_ADD_DISBURSE(?,?,?,?,?,?,?,?,?,@error,@message);",[$request->borrow_id,$request->disb_date,$request->ref_vouch,$request->disb_amt,$request->bank_id,$request->prn_ledg,$request->fin_id,$request->branch_id,auth()->user()->Id]);
 
 
                 if(!$sql){
@@ -426,7 +426,7 @@ class ProcessBorrowings extends Controller
                     }
                 }
 
-                $sql = DB::connection('coops')->statement("Call USP_BORROW_ADD_REPAYMENT(?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->borrow_id,$request->disb_date,$request->prn_amt,$request->intt_amt,$request->bank_id,$request->prn_ledg,$request->intt_gl,$request->fin_id,$request->branch_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_BORROW_ADD_REPAYMENT(?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->borrow_id,$request->disb_date,$request->ref_vouch,$request->prn_amt,$request->intt_amt,$request->bank_id,$request->prn_ledg,$request->intt_gl,$request->fin_id,$request->branch_id,auth()->user()->Id]);
 
 
                 if(!$sql){

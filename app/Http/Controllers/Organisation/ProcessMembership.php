@@ -25,6 +25,7 @@ class ProcessMembership extends Controller
         }
         return $object;
     }
+
     public function process_member_profile_add(Request $request){
         $validator = Validator::make($request->all(),[
             'member_no' => 'required',
@@ -252,10 +253,6 @@ class ProcessMembership extends Controller
             'admm_No' => 'required',
             'adm_fees' => 'required',
             'mem_type' => 'required',
-            'nomin_name' => 'required',
-            'nom_add' => 'required',
-            'nom_rel' => 'required',
-            'nom_age' => 'required',
             'no_of_share' => 'required',
             'share_rate' => 'required',
             'share_amt' => 'required',
@@ -265,7 +262,6 @@ class ProcessMembership extends Controller
             'cash_details' => 'required',
             'branch_id' => 'required',
             'fin_id' => 'required',
-            'ledg_fol' => 'required',
             'org_id' => 'required'
         ]);
 
@@ -300,7 +296,7 @@ class ProcessMembership extends Controller
                     }
                 }
 
-                $sql = DB::connection('coops')->statement("Call USP_ADD_MEMBERSHIP(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->member_id,$request->admm_No,$request->adm_fees,$request->mem_type,$request->nomin_name,$request->nom_add,$request->nom_rel,$request->nom_age,$request->no_of_share,$request->ledg_fol,$request->share_rate,$request->share_amt,$request->tot_amt,$request->adm_gl,$request->share_gl,$request->bank_id,$request->sb_id,$request->branch_id,$request->fin_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_ADD_MEMBERSHIP(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->ref_vouch,$request->member_id,$request->admm_No,$request->adm_fees,$request->mem_type,$request->nomin_name,$request->nom_add,$request->nom_rel,$request->nom_age,$request->no_of_share,$request->ledg_fol,$request->share_rate,$request->share_amt,$request->tot_amt,$request->adm_gl,$request->share_gl,$request->bank_id,$request->sb_id,$request->branch_id,$request->fin_id,auth()->user()->Id]);
 
                 if(!$sql){
                     throw new Exception;
@@ -461,7 +457,7 @@ class ProcessMembership extends Controller
                     }
                 }
 
-                $sql = DB::connection('coops')->statement("Call USP_ADD_SHARE_ISSUE(?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->share_id,$request->mem_id,$request->share_gl,$request->no_share,$request->share_rate,$request->tot_amt,$request->bank_id,$request->sb_id,$request->branch_id,$request->fin_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_ADD_SHARE_ISSUE(?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->ref_vouch,$request->share_id,$request->mem_id,$request->share_gl,$request->no_share,$request->share_rate,$request->tot_amt,$request->bank_id,$request->sb_id,$request->branch_id,$request->fin_id,auth()->user()->Id]);
 
                 if(!$sql){
                     throw new Exception;
@@ -556,7 +552,7 @@ class ProcessMembership extends Controller
                     }
                 }
 
-                $sql = DB::connection('coops')->statement("Call USP_SHARE_REFUND(?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->share_id,$request->mem_id,$request->share_gl,$request->no_share,$request->share_rate,$request->tot_amt,$request->bank_id,$request->sb_id,$request->branch_id,$request->fin_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_SHARE_REFUND(?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->ref_vouch,$request->share_id,$request->mem_id,$request->share_gl,$request->no_share,$request->share_rate,$request->tot_amt,$request->bank_id,$request->sb_id,$request->branch_id,$request->fin_id,auth()->user()->Id]);
 
                 if(!$sql){
                     throw new Exception;
@@ -652,7 +648,7 @@ class ProcessMembership extends Controller
                     }
                 }
 
-                $sql = DB::connection('coops')->statement("Call USP_WITHDRW_MEMBERSHIP(?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->share_id,$request->mem_id,$request->share_gl,$request->dividend_gl,$request->share_amt,$request->dividend_amt,$request->tot_amt,$request->bank_id,$request->sb_id,$request->branch_id,$request->fin_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_WITHDRW_MEMBERSHIP(?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->ref_vouch,$request->share_id,$request->mem_id,$request->share_gl,$request->dividend_gl,$request->share_amt,$request->dividend_amt,$request->tot_amt,$request->bank_id,$request->sb_id,$request->branch_id,$request->fin_id,auth()->user()->Id]);
 
                 if(!$sql){
                     throw new Exception;

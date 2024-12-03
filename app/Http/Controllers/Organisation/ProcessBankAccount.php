@@ -303,7 +303,7 @@ class ProcessBankAccount extends Controller
                     }
                 }
 
-                $sql = DB::connection('coops')->statement("Call USP_ADD_BANK_TRANS(?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->Account_Id,1,$request->Amount,$request->to_account_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_ADD_BANK_TRANS(?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->ref_vouch,$request->Account_Id,1,$request->Amount,$request->to_account_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
 
                 if(!$sql){
                     throw new Exception('Could not process your request !!');
@@ -391,7 +391,7 @@ class ProcessBankAccount extends Controller
                     }
                 }
 
-                $sql = DB::connection('coops')->statement("Call USP_ADD_BANK_TRANS(?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->Account_Id,2,$request->Amount,$request->to_account_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_ADD_BANK_TRANS(?,?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->ref_vouch,$request->Account_Id,2,$request->Amount,$request->to_account_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
 
                 if(!$sql){
                     throw new Exception('Could not process your request !!');
@@ -465,7 +465,7 @@ class ProcessBankAccount extends Controller
                 DB::connection('coops')->beginTransaction();
 
 
-                $sql = DB::connection('coops')->statement("Call USP_ADD_BANK_TRANS(?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->Account_Id,3,$request->Amount,$request->to_account_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_ADD_BANK_TRANS(?,?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->ref_vouch,$request->Account_Id,3,$request->Amount,$request->to_account_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
 
                 if(!$sql){
                     throw new Exception('Could not process your request !!');
@@ -553,7 +553,7 @@ class ProcessBankAccount extends Controller
                     }
                 }
 
-                $sql = DB::connection('coops')->statement("Call USP_ADD_BANK_TRANS(?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->Account_Id,4,$request->Amount,$request->to_account_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_ADD_BANK_TRANS(?,?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->ref_vouch,$request->Account_Id,4,$request->Amount,$request->to_account_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
 
                 if(!$sql){
                     throw new Exception('Could not process your request !!');

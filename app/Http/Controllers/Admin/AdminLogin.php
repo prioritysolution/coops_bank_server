@@ -260,8 +260,12 @@ class AdminLogin extends Controller
            
             $sql = DB::select("Select Id,User_Name From mst_admin_user Where Is_Active=? And Is_Admin=?;",[1,0]);
 
-            if(!$sql){
-                throw new Exception;
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
             }
 
             

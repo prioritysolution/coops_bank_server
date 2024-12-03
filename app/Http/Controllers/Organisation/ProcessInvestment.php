@@ -264,7 +264,7 @@ class ProcessInvestment extends Controller
            
                 
 
-                $sql = DB::connection('coops')->statement("Call USP_ADD_INVESTMENT_ACCOUNT(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->invest_type,$request->acct_type,$request->bank_name,$request->acct_no,$request->open_date,$request->invest_amt,$request->roi,$request->intt_on,$request->duration,$request->mature_date,$request->mature_value,$request->prn_gl,$request->intt_gl,$request->bank_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_ADD_INVESTMENT_ACCOUNT(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->ref_vouch,$request->invest_type,$request->acct_type,$request->bank_name,$request->acct_no,$request->open_date,$request->invest_amt,$request->roi,$request->intt_on,$request->duration,$request->mature_date,$request->mature_value,$request->prn_gl,$request->intt_gl,$request->bank_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
 
 
                 if(!$sql){
@@ -376,7 +376,7 @@ class ProcessInvestment extends Controller
 
                 DB::connection('coops')->beginTransaction();
 
-                $sql = DB::connection('coops')->statement("Call USP_ADD_INVEST_INTT_PAYOUT(?,?,?,?,?,?,?,@error,@message);",[$request->invest_id,$request->trans_date,$request->amount,$request->bank_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_ADD_INVEST_INTT_PAYOUT(?,?,?,?,?,?,?,?,@error,@message);",[$request->invest_id,$request->trans_date,$request->ref_vouch,$request->amount,$request->bank_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
 
 
                 if(!$sql){
@@ -466,7 +466,7 @@ class ProcessInvestment extends Controller
                     }
                 }
            
-                $sql = DB::connection('coops')->statement("Call USP_ADD_INVEST_INSTALLMENT(?,?,?,?,?,?,?,@error,@message);",[$request->invest_id,$request->trans_date,$request->amount,$request->bank_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_ADD_INVEST_INSTALLMENT(?,?,?,?,?,?,?,?,@error,@message);",[$request->invest_id,$request->trans_date,$request->ref_vouch,$request->amount,$request->bank_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
 
 
                 if(!$sql){
@@ -585,7 +585,7 @@ class ProcessInvestment extends Controller
 
                 DB::connection('coops')->beginTransaction();
 
-                $sql = DB::connection('coops')->statement("Call USP_ADD_INVEST_RENEWAL(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->invest_id,$request->trans_date,$request->effect_date,$request->invest_amount,$request->interest_amount,$request->roi,$request->duration,$request->mature_date,$request->mature_val,$request->tds_amt,$request->prn_gl,$request->intt_gl,$request->fin_id,$request->branch_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_ADD_INVEST_RENEWAL(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->invest_id,$request->trans_date,$request->ref_vouch,$request->effect_date,$request->invest_amount,$request->interest_amount,$request->roi,$request->duration,$request->mature_date,$request->mature_val,$request->tds_amt,$request->prn_gl,$request->intt_gl,$request->fin_id,$request->branch_id,auth()->user()->Id]);
 
 
                 if(!$sql){
@@ -722,7 +722,7 @@ class ProcessInvestment extends Controller
 
                 DB::connection('coops')->beginTransaction();
 
-                $sql = DB::connection('coops')->statement("Call USP_INVEST_CLOSE_ACCT(?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->invest_id,$request->trans_date,$request->invest_amount,$request->interest_amount,$request->tds_amt,$request->prn_gl,$request->intt_gl,$request->bank_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_INVEST_CLOSE_ACCT(?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->invest_id,$request->trans_date,$request->ref_vouch,$request->invest_amount,$request->interest_amount,$request->tds_amt,$request->prn_gl,$request->intt_gl,$request->bank_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
 
 
                 if(!$sql){
