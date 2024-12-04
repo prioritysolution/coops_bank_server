@@ -170,6 +170,7 @@ Route::group([
     
     Route::post('/Org/MemberShip/AddProfile',[ProcessMembership::class,'process_member_profile_add']);
     Route::get('/Org/MemberShip/GetMemberData/{org_id}/{member_no}',[ProcessMembership::class,'get_member_data']);
+    Route::get('/Org/MemberShip/GetMembershipData/{org_id}/{member_no}',[ProcessMembership::class,'get_membership_member_data']);
     Route::get('/Org/MemberShip/MemberSearch/{org_id}/{mem_name}',[ProcessMembership::class,'process_member_search']);
     Route::get('/Org/MemberShip/GetProductData/{org_id}/{type_id}',[ProcessMembership::class,'get_shprod_details']);
     Route::post('/Org/MemberShip/AddMembership',[ProcessMembership::class,'process_membership']);

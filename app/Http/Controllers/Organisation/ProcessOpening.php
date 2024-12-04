@@ -26,10 +26,6 @@ class ProcessOpening extends Controller
             'adm_date' => 'required',
             'ledg_no' => 'required',
             'mem_type' => 'required',
-            'nom_name' => 'required',
-            'nom_rel' => 'required',
-            'nom_age' => 'required',
-            'nom_add' => 'required',
             'open_share' => 'required',
             'open_div' => 'required',
             'branch_Id' => 'required'
@@ -98,7 +94,6 @@ class ProcessOpening extends Controller
             'start_date' => 'required',
             'mem_id' => 'required',
             'ref_ac_no' => 'required',
-            'ledg_fol' => 'required',
             'open_date' => 'required',
             'prod_type' => 'required',
             'dep_type' => 'required',
@@ -401,7 +396,6 @@ class ProcessOpening extends Controller
             'disb_date' => 'required',
             'mem_id' => 'required',
             'appl_no' => 'required',
-            'ref_ac_no' => 'required',
             'prod_id' => 'required',
             'roi' => 'required',
             'duration' => 'required',
@@ -425,7 +419,7 @@ class ProcessOpening extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
             DB::connection('coops')->beginTransaction();
-            $sql = DB::connection('coops')->statement("Call USP_PUSH_OPN_LOAN_ACCOUNT(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->start_date,$request->disb_date,$request->mem_id,$request->appl_no,$request->ref_ac_no,$request->prod_id,$request->roi,$request->duration,$request->dur_unit,$request->disb_amount,$request->repay_mode,$request->repay_within,$request->outs_balance,$request->due_intt,auth()->user()->Id,$request->branch_Id]);
+            $sql = DB::connection('coops')->statement("Call USP_PUSH_OPN_LOAN_ACCOUNT(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->start_date,$request->disb_date,$request->mem_id,$request->appl_no,$request->ref_ac_no,$request->ledg_fol,$request->prod_id,$request->roi,$request->duration,$request->dur_unit,$request->disb_amount,$request->repay_mode,$request->repay_within,$request->outs_balance,$request->due_intt,auth()->user()->Id,$request->branch_Id]);
 
             if(!$sql){
                 throw new Exception('Operation Error Found !!');

@@ -160,6 +160,54 @@ class ProcessMembership extends Controller
         }
     }
 
+    public function get_membership_member_data(Int $org_id, Int $member_no){
+        try {
+
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            if(!$sql){
+              throw new Exception;
+            }
+            $org_schema = $sql[0]->db;
+            $db = Config::get('database.connections.mysql');
+            $db['database'] = $org_schema;
+            config()->set('database.connections.coops', $db);
+
+            $sql = DB::connection('coops')->select("Call USP_GET_MEMBERSHIP_MEM_DET(?);",[$member_no]);
+
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
+
+            $error = $sql[0]->Error;
+            $message = $sql[0]->Message;
+
+            if($error<0){
+                return response()->json([
+                    'message' => 'Error Found',
+                    'details' => $message,
+                ],400);
+            }
+            else{
+                return response()->json([
+                    'message' => 'Data Found',
+                    'details' => $sql,
+                ],200);
+            }
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
+
     public function process_member_search(Int $org_id, String $mem_name){
         try {
 

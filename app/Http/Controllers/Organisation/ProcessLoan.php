@@ -488,7 +488,6 @@ class ProcessLoan extends Controller
             'appl_date' => 'required',
             'mem_id' => 'required',
             'appl_no' => 'required',
-            'ref_ac_no' => 'required',
             'prod_id' => 'required',
             'roi' => 'required',
             'duration' => 'required',
