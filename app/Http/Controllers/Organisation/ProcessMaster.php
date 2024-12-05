@@ -1092,7 +1092,7 @@ class ProcessMaster extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
 
-            $sql = DB::connection('coops')->select("Select m.Id,m.Vill_Name,m.State_Id,m.Dist_Id,m.Block_Id From mst_area_village m join mst_area_state s on s.Id=m.State_Id join mst_area_district d on d.Id=m.Dist_Id join mst_area_block b on b.Id=m.Block_Id Order By m.Id;");
+            $sql = DB::connection('coops')->select("Select m.Id,m.Vill_Name,m.State_Id,s.State_Name,d.Dist_Name,b.Block_Name,m.Dist_Id,m.Block_Id From mst_area_village m join mst_area_state s on s.Id=m.State_Id join mst_area_district d on d.Id=m.Dist_Id join mst_area_block b on b.Id=m.Block_Id Order By m.Id;");
 
             if (empty($sql)) {
                 // Custom validation for no data found

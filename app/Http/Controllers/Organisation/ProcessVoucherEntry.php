@@ -157,7 +157,6 @@ class ProcessVoucherEntry extends Controller
             'trans_date' => 'required',
             'vouch_type' => 'required',
             'narration' => 'required',
-            'manual_vouch_no' => 'required',
             'amount' => 'required',
             'fin_id' => 'required',
             'branch_id' => 'required',
@@ -293,7 +292,6 @@ class ProcessVoucherEntry extends Controller
         $validator = Validator::make($request->all(),[
             'trans_date' => 'required',
             'narration' => 'required',
-            'manual_vouch_no' => 'required',
             'fin_id' => 'required',
             'branch_id' => 'required',
             'vouch_data' => 'required',
