@@ -801,8 +801,12 @@ class ProcessModuleReport extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_RPT_LOAN_DISB_REGISTER(?,?,?,?);",[$request->form_date,$request->to_date,$request->prod_id,$request->branch_id]);
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([
@@ -858,8 +862,12 @@ class ProcessModuleReport extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_RPT_LOAN_REPAY_REGISTER(?,?,?,?);",[$request->form_date,$request->to_date,$request->prod_id,$request->branch_id]);
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([
@@ -915,8 +923,12 @@ class ProcessModuleReport extends Controller
 
                 $sql = DB::connection('coops')->select("Call USP_RPT_LOAN_DETAILEDLIST(?,?,?,?);",[$request->prod_id,$request->form_date,$request->to_date,$request->branch_id]);
                 
-                if(!$sql){
-                    throw new Exception("No Data Found");
+                if (empty($sql)) {
+                    // Custom validation for no data found
+                    return response()->json([
+                        'message' => 'No Data Found',
+                        'details' => [],
+                    ], 200);
                 }
 
                     return response()->json([

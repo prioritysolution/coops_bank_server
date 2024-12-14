@@ -114,7 +114,7 @@ class ProcessMaster extends Controller
                 // Custom validation for no data found
                 return response()->json([
                     'message' => 'No Data Found',
-                    'details' => [],
+                    'details' => "No Data Found",
                 ], 200);
             }
 
@@ -294,7 +294,7 @@ class ProcessMaster extends Controller
                 // Custom validation for no data found
                 return response()->json([
                     'message' => 'No Data Found',
-                    'details' => [],
+                    'details' => "No Data Found",
                 ], 200);
             }
 
@@ -403,7 +403,7 @@ class ProcessMaster extends Controller
                 // Custom validation for no data found
                 return response()->json([
                     'message' => 'No Data Found',
-                    'details' => [],
+                    'details' => "No Data Found",
                 ], 200);
             }
 
@@ -512,7 +512,7 @@ class ProcessMaster extends Controller
                 // Custom validation for no data found
                 return response()->json([
                     'message' => 'No Data Found',
-                    'details' => [],
+                    'details' => "No Data Found",
                 ], 200);
             }
 
@@ -694,7 +694,7 @@ class ProcessMaster extends Controller
                 // Custom validation for no data found
                 return response()->json([
                     'message' => 'No Data Found',
-                    'details' => [],
+                    'details' => "No Data Found",
                 ], 200);
             }
 
@@ -877,7 +877,7 @@ class ProcessMaster extends Controller
                 // Custom validation for no data found
                 return response()->json([
                     'message' => 'No Data Found',
-                    'details' => [],
+                    'details' => "No Data Found",
                 ], 200);
             }
 
@@ -988,7 +988,7 @@ class ProcessMaster extends Controller
                 // Custom validation for no data found
                 return response()->json([
                     'message' => 'No Data Found',
-                    'details' => [],
+                    'details' => "No Data Found",
                 ], 200);
             }
 
@@ -1098,7 +1098,7 @@ class ProcessMaster extends Controller
                 // Custom validation for no data found
                 return response()->json([
                     'message' => 'No Data Found',
-                    'details' => [],
+                    'details' => "No Data Found",
                 ], 200);
             }
 
@@ -1280,7 +1280,7 @@ class ProcessMaster extends Controller
                 // Custom validation for no data found
                 return response()->json([
                     'message' => 'No Data Found',
-                    'details' => [],
+                    'details' => "No Data Found",
                 ], 200);
             }
 
@@ -1380,7 +1380,7 @@ class ProcessMaster extends Controller
                 // Custom validation for no data found
                 return response()->json([
                     'message' => 'No Data Found',
-                    'details' => [],
+                    'details' => "No Data Found",
                 ], 200);
             }
 
@@ -1408,7 +1408,7 @@ class ProcessMaster extends Controller
                 // Custom validation for no data found
                 return response()->json([
                     'message' => 'No Data Found',
-                    'details' => [],
+                    'details' => "No Data Found",
                 ], 200);
             }
 

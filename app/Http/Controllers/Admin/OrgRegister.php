@@ -1701,7 +1701,7 @@ class OrgRegister extends Controller
                     $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=? And Id=?",[1,186]);
                 }
                 else if($type_name=='Shr'){
-                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=? And And Sub_Head=?",[1,1]);
+                    $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=? And Sub_Head=?",[1,1]);
                 }
                 else if($type_name=='Div'){
                     $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=? And Id=?",[1,63]);

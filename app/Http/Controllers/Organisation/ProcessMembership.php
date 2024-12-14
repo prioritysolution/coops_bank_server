@@ -28,7 +28,6 @@ class ProcessMembership extends Controller
 
     public function process_member_profile_add(Request $request){
         $validator = Validator::make($request->all(),[
-            'member_no' => 'required',
             'mem_fst_name' => 'required',
             'mem_lst_name' => 'required',
             'mem_rela_name' => 'required',
@@ -78,7 +77,7 @@ class ProcessMembership extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $error_message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
@@ -141,7 +140,7 @@ class ProcessMembership extends Controller
                 return response()->json([
                     'message' => 'Error Found',
                     'details' => $message,
-                ],400);
+                ],200);
             }
             else{
                 return response()->json([
@@ -189,7 +188,7 @@ class ProcessMembership extends Controller
                 return response()->json([
                     'message' => 'Error Found',
                     'details' => $message,
-                ],400);
+                ],200);
             }
             else{
                 return response()->json([
@@ -274,7 +273,7 @@ class ProcessMembership extends Controller
                 return response()->json([
                     'message' => 'Error Found',
                     'details' => 'No Mapping Data Found !!',
-                ],400);
+                ],200);
             }
             else{
                 return response()->json([
@@ -298,7 +297,6 @@ class ProcessMembership extends Controller
         $validator = Validator::make($request->all(),[
             'trans_date' => 'required',
             'member_id' => 'required',
-            'admm_No' => 'required',
             'adm_fees' => 'required',
             'mem_type' => 'required',
             'no_of_share' => 'required',
@@ -359,7 +357,7 @@ class ProcessMembership extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $error_message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
@@ -428,7 +426,7 @@ class ProcessMembership extends Controller
                 return response()->json([
                     'message' => 'Error Found',
                     'details' => $message,
-                ],400);
+                ],200);
             }
             else{
                 return response()->json([
@@ -520,7 +518,7 @@ class ProcessMembership extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $error_message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
@@ -615,7 +613,7 @@ class ProcessMembership extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $error_message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
@@ -711,7 +709,7 @@ class ProcessMembership extends Controller
                     return response()->json([
                         'message' => 'Error Found',
                         'details' => $error_message,
-                    ],400);
+                    ],200);
                 }
                 else{
                     DB::connection('coops')->commit();
