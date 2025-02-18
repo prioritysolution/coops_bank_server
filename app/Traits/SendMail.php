@@ -11,11 +11,11 @@ trait SendMail
         switch ($for) {
             case 1:
                 $subject = "OTP For Forgot Password";
-                $messageBody = "Dear, " . $to . ", OTP for Forgot Password of your account is: " . $otp;
+                $messageBody = "Dear, " . $to . ", OTP for Forgot Password of your PrioBank account is: " . $otp;
                 break;
             case 2:
                 $subject = "OTP For Terminate Active Session";
-                $messageBody = "Dear, " . $to . ", OTP for termination of your previous active session is: " . $otp;
+                $messageBody = "Dear, " . $to . ", OTP for termination of your PrioBank previous active session is: " . $otp;
                 break;
             default:
                 $subject = "No Subject";

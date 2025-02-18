@@ -35,7 +35,7 @@ trait SpecimenUpload
             $root_path = url('storage/'.$file_path);
         }
         else{
-            $root_path=url('storage/specimen/no-img.png'); 
+            $root_path=url('storage/design/no-img.png'); 
         }
         
         return $root_path;
