@@ -96,10 +96,10 @@ class ProcessMaster extends Controller
         }
     } 
     
-    public function get_sate_list(Int $org_id){
+    public function get_sate_list(Request $request){
         try {
 
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
             if(!$sql){
               throw new Exception;
             }
@@ -276,41 +276,46 @@ class ProcessMaster extends Controller
         }
     }
 
-    public function get_dist_list(Int $org_id){
+    public function get_dist_list(REquest $request){
         try {
-
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
-            if(!$sql){
-              throw new Exception;
+            $sql = DB::select("SELECT UDF_GET_ORG_SCHEMA(?) as db;", [$request->org_id]);
+            if (!$sql) {
+                throw new Exception('Database schema not found.');
             }
+        
             $org_schema = $sql[0]->db;
             $db = Config::get('database.connections.mysql');
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
-
-            $sql = DB::connection('coops')->select("Select m.Id,m.Dist_Name,s.State_Name,s.Id As State_Id From mst_area_district m join mst_area_state s on s.Id=m.State_Id Order By m.Id;");
-
-            if (empty($sql)) {
-                // Custom validation for no data found
+        
+            // Fetch paginated results using query builder
+            $sql = DB::connection('coops')->table('mst_area_district as m')
+                ->join('mst_area_state as s', 's.Id', '=', 'm.State_Id')
+                ->select('m.Id', 'm.Dist_Name', 's.State_Name', 's.Id AS State_Id')
+                ->orderBy('m.Id')
+                ->paginate(10); // Change 10 to any desired limit
+        
+            if ($sql->isEmpty()) {
                 return response()->json([
                     'message' => 'No Data Found',
                     'details' => "No Data Found",
                 ], 200);
             }
-
+        
             return response()->json([
                 'message' => 'Data Found',
-                'details' => $sql,
-            ],200);
-
+                'data' => $sql,
+            ], 200);
+        
         } catch (Exception $ex) {
             $response = response()->json([
                 'message' => 'Error Found',
                 'details' => $ex->getMessage(),
-            ],400);
-
+            ], 400);
+        
             throw new HttpResponseException($response);
         }
+        
     }
 
     public function process_update_dist(Request $request){
@@ -385,10 +390,10 @@ class ProcessMaster extends Controller
         }
     }
 
-    public function get_statewise_dist(Int $state_id,Int $org_id){
+    public function get_statewise_dist(Request $request){
         try {
 
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
             if(!$sql){
               throw new Exception;
             }
@@ -397,7 +402,7 @@ class ProcessMaster extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
 
-            $sql = DB::connection('coops')->select("Select Id,Dist_Name From mst_area_district Where State_Id=?;",[$state_id]);
+            $sql = DB::connection('coops')->select("Select Id,Dist_Name From mst_area_district Where State_Id=?;",[$request->state_id]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -494,41 +499,48 @@ class ProcessMaster extends Controller
         }
     }
 
-    public function get_block_list(Int $org_id){
+    public function get_block_list(Request $request){
         try {
-
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
-            if(!$sql){
-              throw new Exception;
+            $sql = DB::select("SELECT UDF_GET_ORG_SCHEMA(?) as db;", [$request->org_id]);
+            if (!$sql) {
+                throw new Exception('Database schema not found.');
             }
+        
             $org_schema = $sql[0]->db;
             $db = Config::get('database.connections.mysql');
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
-
-            $sql = DB::connection('coops')->select("Select m.Id,m.Block_Name,s.State_Name,s.Id As State_Id,d.Dist_Name,d.Id As Dist_Id From mst_area_block m join mst_area_state s on s.Id=m.State_Id join mst_area_district d on d.Id=m.Dist_Id Order By m.Id;");
-
-            if (empty($sql)) {
-                // Custom validation for no data found
+        
+            // Get pagination parameters
+            $perPage = request()->get('limit', 10); // Default limit: 10
+            $sql = DB::connection('coops')->table('mst_area_block as m')
+                ->join('mst_area_state as s', 's.Id', '=', 'm.State_Id')
+                ->join('mst_area_district as d', 'd.Id', '=', 'm.Dist_Id')
+                ->select('m.Id', 'm.Block_Name', 's.State_Name', 's.Id AS State_Id', 'd.Dist_Name', 'd.Id AS Dist_Id')
+                ->orderBy('m.Id')
+                ->paginate($perPage); // Laravel's paginate method
+        
+            if ($sql->isEmpty()) {
                 return response()->json([
                     'message' => 'No Data Found',
                     'details' => "No Data Found",
                 ], 200);
             }
-
+        
             return response()->json([
                 'message' => 'Data Found',
-                'details' => $sql,
-            ],200);
-
+                'data' => $sql,
+            ], 200);
+        
         } catch (Exception $ex) {
             $response = response()->json([
                 'message' => 'Error Found',
                 'details' => $ex->getMessage(),
-            ],400);
-
+            ], 400);
+        
             throw new HttpResponseException($response);
         }
+        
     }
 
     public function process_update_block(Request $request){
@@ -676,41 +688,50 @@ class ProcessMaster extends Controller
         }
     }
 
-    public function get_police_list(Int $org_id){
+    public function get_police_list(Request $request){
         try {
-
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
-            if(!$sql){
-              throw new Exception;
+            $sql = DB::select("SELECT UDF_GET_ORG_SCHEMA(?) as db;", [$request->org_id]);
+            if (!$sql) {
+                throw new Exception('Database schema not found.');
             }
+        
             $org_schema = $sql[0]->db;
             $db = Config::get('database.connections.mysql');
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
-
-            $sql = DB::connection('coops')->select("Select m.Id,m.STation_Name,s.State_Name,s.Id As State_Id,d.Dist_Name,d.Id As Dist_Id From mst_area_policestation m join mst_area_state s on s.Id=m.State_Id join mst_area_district d on d.Id=m.Dist_Id Order By m.Id;");
-
-            if (empty($sql)) {
-                // Custom validation for no data found
+        
+            // Get pagination parameters from request
+            $perPage = request()->get('limit', 10); // Default limit: 10
+        
+            // Fetch paginated results using Laravel Query Builder
+            $sql = DB::connection('coops')->table('mst_area_policestation as m')
+                ->join('mst_area_state as s', 's.Id', '=', 'm.State_Id')
+                ->join('mst_area_district as d', 'd.Id', '=', 'm.Dist_Id')
+                ->select('m.Id', 'm.STation_Name', 's.State_Name', 's.Id AS State_Id', 'd.Dist_Name', 'd.Id AS Dist_Id')
+                ->orderBy('m.Id')
+                ->paginate($perPage); // Laravel handles LIMIT & OFFSET automatically
+        
+            if ($sql->isEmpty()) {
                 return response()->json([
                     'message' => 'No Data Found',
                     'details' => "No Data Found",
                 ], 200);
             }
-
+        
             return response()->json([
                 'message' => 'Data Found',
-                'details' => $sql,
-            ],200);
-
+                'data' => $sql,
+            ], 200);
+        
         } catch (Exception $ex) {
             $response = response()->json([
                 'message' => 'Error Found',
                 'details' => $ex->getMessage(),
-            ],400);
-
+            ], 400);
+        
             throw new HttpResponseException($response);
         }
+        
     }
 
     public function process_update_police(Request $request){
@@ -859,41 +880,50 @@ class ProcessMaster extends Controller
         }
     }
 
-    public function get_post_office(Int $org_id){
+    public function get_post_office(Request $request){
         try {
-
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
-            if(!$sql){
-              throw new Exception;
+            $sql = DB::select("SELECT UDF_GET_ORG_SCHEMA(?) as db;", [$request->org_id]);
+            if (!$sql) {
+                throw new Exception('Database schema not found.');
             }
+        
             $org_schema = $sql[0]->db;
             $db = Config::get('database.connections.mysql');
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
-
-            $sql = DB::connection('coops')->select("Select m.Id,m.Post_Off_Name,m.Pin_Code,s.State_Name,s.Id As State_Id,d.Dist_Name,d.Id As Dist_Id From mst_area_post_office m join mst_area_state s on s.Id=m.State_Id join mst_area_district d on d.Id=m.Dist_Id Order By m.Id;");
-
-            if (empty($sql)) {
-                // Custom validation for no data found
+        
+            // Get pagination parameters from request
+            $perPage = request()->get('limit', 10); // Default limit: 10
+        
+            // Fetch paginated results using Laravel Query Builder
+            $sql = DB::connection('coops')->table('mst_area_post_office as m')
+                ->join('mst_area_state as s', 's.Id', '=', 'm.State_Id')
+                ->join('mst_area_district as d', 'd.Id', '=', 'm.Dist_Id')
+                ->select('m.Id', 'm.Post_Off_Name', 'm.Pin_Code', 's.State_Name', 's.Id AS State_Id', 'd.Dist_Name', 'd.Id AS Dist_Id')
+                ->orderBy('m.Id')
+                ->paginate($perPage); // Laravel's paginate method
+        
+            if ($sql->isEmpty()) {
                 return response()->json([
                     'message' => 'No Data Found',
                     'details' => "No Data Found",
                 ], 200);
             }
-
+        
             return response()->json([
                 'message' => 'Data Found',
-                'details' => $sql,
-            ],200);
-
+                'data' => $sql,
+            ], 200);
+        
         } catch (Exception $ex) {
             $response = response()->json([
                 'message' => 'Error Found',
                 'details' => $ex->getMessage(),
-            ],400);
-
+            ], 400);
+        
             throw new HttpResponseException($response);
         }
+        
     }
 
     public function process_update_postoffice(Request $request){
@@ -970,10 +1000,10 @@ class ProcessMaster extends Controller
         }
     }
 
-    public function get_distwise_block(Int $org_id,Int $dist_id,Int $state_id){
+    public function get_distwise_block(Request $request){
         try {
 
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
             if(!$sql){
               throw new Exception;
             }
@@ -982,7 +1012,7 @@ class ProcessMaster extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
 
-            $sql = DB::connection('coops')->select("Select Id,Block_Name From mst_area_block Where State_Id=? And Dist_Id=?;",[$state_id,$dist_id]);
+            $sql = DB::connection('coops')->select("Select Id,Block_Name From mst_area_block Where State_Id=? And Dist_Id=?;",[$request->state_id,$request->dist_id]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -1080,41 +1110,51 @@ class ProcessMaster extends Controller
         }
     }
 
-    public function get_village_list(Int $org_id){
+    public function get_village_list(Request $request){
         try {
-
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
-            if(!$sql){
-              throw new Exception;
+            $sql = DB::select("SELECT UDF_GET_ORG_SCHEMA(?) as db;", [$request->org_id]);
+            if (!$sql) {
+                throw new Exception('Database schema not found.');
             }
+        
             $org_schema = $sql[0]->db;
             $db = Config::get('database.connections.mysql');
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
-
-            $sql = DB::connection('coops')->select("Select m.Id,m.Vill_Name,m.State_Id,s.State_Name,d.Dist_Name,b.Block_Name,m.Dist_Id,m.Block_Id From mst_area_village m join mst_area_state s on s.Id=m.State_Id join mst_area_district d on d.Id=m.Dist_Id join mst_area_block b on b.Id=m.Block_Id Order By m.Id;");
-
-            if (empty($sql)) {
-                // Custom validation for no data found
+        
+            // Get pagination parameters from request
+            $perPage = request()->get('limit', 10); // Default limit: 10
+        
+            // Fetch paginated results using Laravel Query Builder
+            $sql = DB::connection('coops')->table('mst_area_village as m')
+                ->join('mst_area_state as s', 's.Id', '=', 'm.State_Id')
+                ->join('mst_area_district as d', 'd.Id', '=', 'm.Dist_Id')
+                ->join('mst_area_block as b', 'b.Id', '=', 'm.Block_Id')
+                ->select('m.Id', 'm.Vill_Name', 'm.State_Id', 's.State_Name', 'd.Dist_Name', 'b.Block_Name', 'm.Dist_Id', 'm.Block_Id')
+                ->orderBy('m.Id')
+                ->paginate($perPage); // Laravel's pagination method
+        
+            if ($sql->isEmpty()) {
                 return response()->json([
                     'message' => 'No Data Found',
                     'details' => "No Data Found",
                 ], 200);
             }
-
+        
             return response()->json([
                 'message' => 'Data Found',
-                'details' => $sql,
-            ],200);
-
+                'data' => $sql,
+            ], 200);
+        
         } catch (Exception $ex) {
             $response = response()->json([
                 'message' => 'Error Found',
                 'details' => $ex->getMessage(),
-            ],400);
-
+            ], 400);
+        
             throw new HttpResponseException($response);
         }
+        
     }
 
     public function process_update_village(Request $request){
@@ -1262,41 +1302,57 @@ class ProcessMaster extends Controller
         }
     }
 
-    public function get_unit_list(Int $org_id){
+    public function get_unit_list(Request $request){
         try {
-
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
-            if(!$sql){
-              throw new Exception;
+            $sql = DB::select("SELECT UDF_GET_ORG_SCHEMA(?) as db;", [$request->org_id]);
+            if (!$sql) {
+                throw new Exception('Database schema not found.');
             }
+        
             $org_schema = $sql[0]->db;
             $db = Config::get('database.connections.mysql');
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
-
-            $sql = DB::connection('coops')->select("Select Id,Unit_Name,Unit_No From mst_area_unit Order By Id;");
-
-            if (empty($sql)) {
-                // Custom validation for no data found
+        
+            // Get pagination and filter parameters from request
+            $perPage = request()->get('limit', 10); // Default limit: 10
+            $unitName = request()->get('keyword',''); // Filter by Unit_Name
+        
+            // Query Builder with optional filtering
+            $query = DB::connection('coops')->table('mst_area_unit')
+                ->select('Id', 'Unit_Name', 'Unit_No')
+                ->orderBy('Id');
+        
+            // Apply filter if Unit_Name is provided
+            if (!empty($unitName)) {
+                $query->where('Unit_Name', 'like', "%$unitName%");
+            }
+        
+            // Apply pagination
+            $sql = $query->paginate($perPage);
+        
+            if ($sql->isEmpty()) {
                 return response()->json([
                     'message' => 'No Data Found',
                     'details' => "No Data Found",
                 ], 200);
             }
-
+        
             return response()->json([
                 'message' => 'Data Found',
-                'details' => $sql,
-            ],200);
-
+                'data' => $sql,
+            ], 200);
+        
         } catch (Exception $ex) {
             $response = response()->json([
                 'message' => 'Error Found',
                 'details' => $ex->getMessage(),
-            ],400);
-
+            ], 400);
+        
             throw new HttpResponseException($response);
         }
+        
+        
     }
 
     public function process_update_unit(Request $request){
@@ -1511,10 +1567,10 @@ class ProcessMaster extends Controller
         }
     }
 
-    public function get_blkwise_village(Int $org_id,Int $blk_id){
+    public function get_blkwise_village(Request $request){
         try {
 
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
             if(!$sql){
               throw new Exception;
             }
@@ -1523,7 +1579,7 @@ class ProcessMaster extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
 
-            $sql = DB::connection('coops')->select("Select Id,Vill_Name From mst_area_village Where Block_Id=? And Is_Active=?;",[$blk_id,1]);
+            $sql = DB::connection('coops')->select("Select Id,Vill_Name From mst_area_village Where Block_Id=? And Is_Active=?;",[$request->block_id,1]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -1548,10 +1604,10 @@ class ProcessMaster extends Controller
         }
     }
 
-    public function get_distwise_police(Int $org_id,Int $dist_id){
+    public function get_distwise_police(Request $request){
         try {
 
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
             if(!$sql){
               throw new Exception;
             }
@@ -1560,7 +1616,7 @@ class ProcessMaster extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
 
-            $sql = DB::connection('coops')->select("Select Id,STation_Name From mst_area_policestation Where Dist_Id=? And Is_Active=?;",[$dist_id,1]);
+            $sql = DB::connection('coops')->select("Select Id,STation_Name From mst_area_policestation Where Dist_Id=? And Is_Active=?;",[$request->dist_id,1]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -1585,10 +1641,10 @@ class ProcessMaster extends Controller
         }
     }
 
-    public function get_distwise_post(Int $org_id, Int $dist_id){
+    public function get_distwise_post(Request $request){
         try {
 
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
             if(!$sql){
               throw new Exception;
             }
@@ -1597,7 +1653,7 @@ class ProcessMaster extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
 
-            $sql = DB::connection('coops')->select("Select Id,Post_Off_Name,Pin_Code From mst_area_post_office Where Dist_Id=? And Is_Active=?;",[$dist_id,1]);
+            $sql = DB::connection('coops')->select("Select Id,Post_Off_Name,Pin_Code From mst_area_post_office Where Dist_Id=? And Is_Active=?;",[$request->dist_id,1]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -1683,10 +1739,10 @@ class ProcessMaster extends Controller
         }
     }
 
-    public function get_share_details(Int $org_id, Int $prod_id){
+    public function get_share_details(Request $request){
         try {
 
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
             if(!$sql){
               throw new Exception;
             }
@@ -1695,7 +1751,7 @@ class ProcessMaster extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
 
-            $sql = DB::connection('coops')->select("Select Id,Adm_Fees,Share_Rate From config_share_product Where Mem_Type=? And Is_Active=?;",[$prod_id,1]);
+            $sql = DB::connection('coops')->select("Select Id,Adm_Fees,Share_Rate From config_share_product Where Mem_Type=? And Is_Active=?;",[$request->prod_id,1]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -1826,10 +1882,10 @@ class ProcessMaster extends Controller
          }
     }
 
-    public function get_deposit_agent(Int $org_id){
+    public function get_deposit_agent(Request $request){
         try {
 
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
             if(!$sql){
               throw new Exception;
             }

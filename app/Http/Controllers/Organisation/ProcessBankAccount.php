@@ -163,10 +163,10 @@ class ProcessBankAccount extends Controller
         }
     }
 
-    public function get_bank_account(Int $org_id){
+    public function get_bank_account(Request $request){
         try {
 
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
             if(!$sql){
               throw new Exception;
             }
@@ -175,7 +175,7 @@ class ProcessBankAccount extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
 
-            $sql = DB::connection('coops')->select("Select Id,Bank_Name,Bank_Branch,Bank_IFSC,Account_No,UDF_GET_OPTION_NAME(Account_Type) As Type From mst_bank_account_master Where Is_Active=1;");
+            $sql = DB::connection('coops')->select("Select Id,Bank_Name,Bank_Branch,Bank_IFSC,Account_No,UDF_GET_OPTION_NAME(Account_Type) As Type,Concat(Bank_Name,' - ',Account_No) As New_Account From mst_bank_account_master Where Is_Active=1;");
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -201,14 +201,6 @@ class ProcessBankAccount extends Controller
     }
 
     public function get_bank_balance(Request $request){
-        $validator = Validator::make($request->all(),[
-            'account_id' => 'required',
-            'date' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -249,18 +241,6 @@ class ProcessBankAccount extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }  
     }
 
     public function process_bank_deposit(Request $request){
@@ -303,7 +283,24 @@ class ProcessBankAccount extends Controller
                     }
                 }
 
-                $sql = DB::connection('coops')->statement("Call USP_ADD_BANK_TRANS(?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->ref_vouch,$request->Account_Id,1,$request->Amount,$request->to_account_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
+                $ledger_drop_table = DB::connection('coops')->statement("Drop Temporary Table If Exists temp_vouch_data;");
+                $ledger_create_table = DB::connection('coops')->statement("Create Temporary Table temp_vouch_data
+                                                                        (
+                                                                        Gl_Id			Int,
+                                                                        Amount			Numeric(18,2),
+                                                                        Sub_Ledg_Id		Int,
+                                                                        Subledg_Narr	Varchar(100),
+                                                                        Subledg_Type	Varchar(10)
+                                                                        );");
+                if(is_array($request->ledger_data)){
+                    $ledger_date = $this->convertToObject($request->ledger_data);
+
+                    foreach ($ledger_date as $ledger) {
+                        $ledger_insert = DB::connection('coops')->statement("Insert Into temp_vouch_data (Gl_Id,Amount,Sub_Ledg_Id,Subledg_Narr,Subledg_Type) Values (?,?,?,?,?);",[$ledger->gl_id,$ledger->amount,$ledger->subgl_id,$ledger->subgl_narr,$ledger->subgl_type]);
+                    }
+                }
+
+                $sql = DB::connection('coops')->statement("Call USP_ADD_BANK_TRANS(?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->ref_vouch,$request->narration,$request->Account_Id,1,$request->Amount,$request->to_account_id,$request->fin_id,$request->branch_id,auth()->user()->Id,$request->trans_mode]);
 
                 if(!$sql){
                     throw new Exception('Could not process your request !!');
@@ -391,7 +388,25 @@ class ProcessBankAccount extends Controller
                     }
                 }
 
-                $sql = DB::connection('coops')->statement("Call USP_ADD_BANK_TRANS(?,?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->ref_vouch,$request->Account_Id,2,$request->Amount,$request->to_account_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
+                $ledger_drop_table = DB::connection('coops')->statement("Drop Temporary Table If Exists temp_vouch_data;");
+                $ledger_create_table = DB::connection('coops')->statement("Create Temporary Table temp_vouch_data
+                                                                        (
+                                                                        Gl_Id			Int,
+                                                                        Amount			Numeric(18,2),
+                                                                        Sub_Ledg_Id		Int,
+                                                                        Subledg_Narr	Varchar(100),
+                                                                        Subledg_Type	Varchar(10)
+                                                                        );");
+                                                                        
+                if(is_array($request->ledger_data)){
+                    $ledger_date = $this->convertToObject($request->ledger_data);
+
+                    foreach ($ledger_date as $ledger) {
+                        $ledger_insert = DB::connection('coops')->statement("Insert Into temp_vouch_data (Gl_Id,Amount,Sub_Ledg_Id,Subledg_Narr,Subledg_Type) Values (?,?,?,?,?);",[$ledger->gl_id,$ledger->amount,$ledger->subgl_id,$ledger->subgl_narr,$ledger->subgl_type]);
+                    }
+                }
+
+                $sql = DB::connection('coops')->statement("Call USP_ADD_BANK_TRANS(?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->ref_vouch,$request->narration,$request->Account_Id,2,$request->Amount,$request->to_account_id,$request->fin_id,$request->branch_id,auth()->user()->Id,$request->trans_mode]);
 
                 if(!$sql){
                     throw new Exception('Could not process your request !!');
@@ -465,7 +480,7 @@ class ProcessBankAccount extends Controller
                 DB::connection('coops')->beginTransaction();
 
 
-                $sql = DB::connection('coops')->statement("Call USP_ADD_BANK_TRANS(?,?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->ref_vouch,$request->Account_Id,3,$request->Amount,$request->to_account_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_ADD_BANK_TRANS(?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->ref_vouch,null,$request->Account_Id,3,$request->Amount,$request->to_account_id,$request->fin_id,$request->branch_id,auth()->user()->Id,null]);
 
                 if(!$sql){
                     throw new Exception('Could not process your request !!');
@@ -553,7 +568,7 @@ class ProcessBankAccount extends Controller
                     }
                 }
 
-                $sql = DB::connection('coops')->statement("Call USP_ADD_BANK_TRANS(?,?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->ref_vouch,$request->Account_Id,4,$request->Amount,$request->to_account_id,$request->fin_id,$request->branch_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_ADD_BANK_TRANS(?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->trans_date,$request->ref_vouch,null,$request->Account_Id,4,$request->Amount,$request->to_account_id,$request->fin_id,$request->branch_id,auth()->user()->Id,null]);
 
                 if(!$sql){
                     throw new Exception('Could not process your request !!');
@@ -602,16 +617,6 @@ class ProcessBankAccount extends Controller
     }
 
     public function process_bank_ledger(Request $request){
-        $validator = Validator::make($request->all(),[
-            'bank_id' => 'required',
-            'form_date' => 'required',
-            'to_date' => 'required',
-            'mode' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -647,18 +652,6 @@ class ProcessBankAccount extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }  
 
     }
 }

@@ -14,9 +14,11 @@ use Session;
 use Storage;
 use DB;
 use \stdClass;
+use App\Traits\SendSMS;
 
 class ProcessLoan extends Controller
 {
+    use SendSMS;
     public function convertToObject($array) {
         $object = new stdClass();
         foreach ($array as $key => $value) {
@@ -29,12 +31,6 @@ class ProcessLoan extends Controller
     }
 
     public function get_member_info(Request $request){
-        $validator = Validator::make($request->all(),[
-            'org_id' => 'required',
-            'mem_no' => 'required',
-            'date' => 'required'
-        ]);
-        if($validator->passes()){
         try {
 
             $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -82,22 +78,11 @@ class ProcessLoan extends Controller
             throw new HttpResponseException($response);
         }
     }
-    else{
-        $errors = $validator->errors();
 
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-    }
-    }
-
-    public function get_loan_product(Int $org_Id){
+    public function get_loan_product(Request $request){
         try {
 
-            $sql = DB::select("Select Id,Prod_Sh_Name,Loan_Type From map_org_loan_product Where org_Id=?;",[$org_Id]);
+            $sql = DB::select("Select Id,Prod_Sh_Name,Loan_Type From map_org_loan_product Where org_Id=?;",[$request->org_id]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -123,10 +108,10 @@ class ProcessLoan extends Controller
         }
     }
 
-    public function get_prod_duration(Int $prod_id, Int $org_id){
+    public function get_prod_duration(Request $request){
         try {
 
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
             if(!$sql){
               throw new Exception;
             }
@@ -135,7 +120,7 @@ class ProcessLoan extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
 
-            $sql = DB::connection('coops')->select("Call USP_GET_LOAN_PARAM(?,?);",[$prod_id,2]);
+            $sql = DB::connection('coops')->select("Call USP_GET_LOAN_PARAM(?,?);",[$request->prod_id,2]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -160,10 +145,10 @@ class ProcessLoan extends Controller
         }
     }
 
-    public function get_prod_repay_mode(Int $prod_id, Int $org_id){
+    public function get_prod_repay_mode(Request $request){
         try {
 
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
             if(!$sql){
               throw new Exception;
             }
@@ -172,7 +157,7 @@ class ProcessLoan extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
 
-            $sql = DB::connection('coops')->select("Call USP_GET_LOAN_PARAM(?,?);",[$prod_id,1]);
+            $sql = DB::connection('coops')->select("Call USP_GET_LOAN_PARAM(?,?);",[$request->prod_id,1]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -198,12 +183,6 @@ class ProcessLoan extends Controller
     }
 
     public function check_appl_amount(Request $request){
-        $validator = Validator::make($request->all(),[
-            'org_id' => 'required',
-            'prod_id' => 'required',
-            'amount' => 'required'
-        ]);
-        if($validator->passes()){
         try {
 
             $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -251,26 +230,8 @@ class ProcessLoan extends Controller
             throw new HttpResponseException($response);
         }
     }
-    else{
-        $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-    }
-    }
 
     public function check_duration(Request $request){
-        $validator = Validator::make($request->all(),[
-            'org_id' => 'required',
-            'prod_id' => 'required',
-            'duration' => 'required',
-            'dur_unit' => 'required'
-        ]);
-        if($validator->passes()){
         try {
 
             $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -318,22 +279,11 @@ class ProcessLoan extends Controller
             throw new HttpResponseException($response);
         }
     }
-    else{
-        $errors = $validator->errors();
 
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-    }
-    }
-
-    public function get_interest_rate(Int $org_id, Int $prod_id){
+    public function get_interest_rate(Request $request){
         try {
 
-            $sql = DB::select("Select Roi From map_org_loan_product Where org_Id=? And Id=?;",[$org_id,$prod_id]);
+            $sql = DB::select("Select Roi From map_org_loan_product Where org_Id=? And Id=?;",[$request->org_id,$request->prod_id]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -360,13 +310,6 @@ class ProcessLoan extends Controller
     }
 
     public function get_emi_amount(Request $request){
-        $validator = Validator::make($request->all(),[
-            'org_id' => 'required',
-            'principal' => 'required',
-            'roi' => 'required',
-            'duration' => 'required'
-        ]);
-        if($validator->passes()){
         try {
 
             $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -404,26 +347,8 @@ class ProcessLoan extends Controller
             throw new HttpResponseException($response);
         }
     }
-    else{
-        $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-    }
-    }
 
     public function chek_loan_eligible(Request $request){
-        $validator = Validator::make($request->all(),[
-            'org_id' => 'required',
-            'prod_id' => 'required',
-            'mem_id' => 'required',
-            'date' => 'required'
-        ]);
-        if($validator->passes()){
         try {
 
             $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -470,17 +395,6 @@ class ProcessLoan extends Controller
             throw new HttpResponseException($response);
         }
     }
-    else{
-        $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-    } 
-    }
 
     public function process_loan_application(Request $request){
         $validator = Validator::make($request->all(),[
@@ -508,8 +422,23 @@ class ProcessLoan extends Controller
             $db = Config::get('database.connections.mysql');
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
+            DB::connection('coops')->beginTransaction();
 
-            $sql = DB::connection('coops')->statement("Call USP_LOAN_ADD_APPLICATION(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->appl_date,$request->mem_id,$request->appl_no,$request->ref_ac_no,$request->ledg_folio,$request->prod_id,$request->roi,$request->duration,$request->dur_unit,$request->appl_amount,$request->repay_mode,$request->repay_within,auth()->user()->Id,$request->branch_Id]);
+            $cash_drop_table = DB::connection('coops')->statement("Drop Temporary Table If Exists tempsecurity;");
+            $cash_create_table = DB::connection('coops')->statement("Create Temporary Table tempsecurity
+                                                                    (
+                                                                        Dep_Id			Int,
+                                                                        Dep_Balance		Numeric(18,2)
+                                                                    );");
+                if(is_array($request->sec_details)){
+                    $cash_data = $this->convertToObject($request->sec_details);
+
+                    foreach ($cash_data as $denom_data) {
+                        $meter_insert =  DB::connection('coops')->statement("Insert Into tempsecurity (Dep_Id,Dep_Balance) Values (?,?);",[$denom_data->dep_id,$denom_data->balance]);
+                    }
+                }
+
+            $sql = DB::connection('coops')->statement("Call USP_LOAN_ADD_APPLICATION(?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->appl_date,$request->mem_id,$request->appl_no,$request->ref_ac_no,$request->ledg_folio,$request->prod_id,$request->roi,$request->duration,$request->dur_unit,$request->appl_amount,$request->repay_mode,$request->repay_within,auth()->user()->Id,$request->branch_Id]);
 
             if(!$sql){
                 throw new Exception('Operation Error Found !!');
@@ -519,12 +448,14 @@ class ProcessLoan extends Controller
             $message = $result[0]->Message;
 
             if($error_No<0){
+                DB::connection('coops')->rollBack();
                 return response()->json([
                     'message' => 'Error Found',
                     'details' => $message,
                 ],200);
             }
             else{
+                DB::connection('coops')->commit();
                 return response()->json([
                     'message' => 'Success',
                     'details' => $message,
@@ -532,6 +463,7 @@ class ProcessLoan extends Controller
             }
             
         } catch (Exception $ex) {
+            DB::connection('coops')->rollBack();
             $response = response()->json([
                 'message' => 'Error Found',
                 'details' => $ex->getMessage(),
@@ -552,10 +484,10 @@ class ProcessLoan extends Controller
     } 
     }
 
-    public function get_pending_disb_list(Int $org_id, Int $branch_id){
+    public function get_pending_disb_list(Request $request){
         try {
 
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
             if(!$sql){
               throw new Exception;
             }
@@ -564,7 +496,7 @@ class ProcessLoan extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
 
-            $sql = DB::connection('coops')->select("Call USP_LOAN_GET_DISB_LIST(?);",[$branch_id]);
+            $sql = DB::connection('coops')->select("Call USP_LOAN_GET_DISB_LIST(?);",[$request->branch_id]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -590,11 +522,66 @@ class ProcessLoan extends Controller
     }
 
     public function search_account(Request $request){
-        $validator = Validator::make($request->all(),[
-            'org_id' => 'required',
-            'mode' => 'required'
-        ]);
-        if($validator->passes()){
+        try {
+            // Get organization schema
+            $sql = DB::select("SELECT UDF_GET_ORG_SCHEMA(?) as db;", [$request->org_id]);
+            if (!$sql) {
+                throw new Exception('Database schema not found.');
+            }
+        
+            $org_schema = $sql[0]->db;
+            $db = Config::get('database.connections.mysql');
+            $db['database'] = $org_schema;
+            config()->set('database.connections.coops', $db);
+        
+            // Get pagination parameters
+            $perPage = request()->get('limit', 10); // Default items per page: 10
+            $page = request()->get('page', 1); // Default page: 1
+            $offset = ($page - 1) * $perPage;
+        
+            // Fetch all results from the stored procedure
+            $results = DB::connection('coops')->select(
+                "CALL USP_LOAN_SEARCH_ACCOUNT(?,?,?);",
+                [$request->member_name, $request->member_no, $request->mode]
+            );
+        
+            // Convert results to a collection for manual pagination
+            $collection = collect($results);
+        
+            // Paginate results
+            $paginatedData = $collection->slice($offset, $perPage)->values();
+            $total = $collection->count();
+        
+            if ($paginatedData->isEmpty()) {
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'data' => [],
+                ], 200);
+            }
+        
+            return response()->json([
+                'message' => 'Data Found',
+                'data' => [
+                    'current_page' => $page,
+                    'per_page' => $perPage,
+                    'total' => $total,
+                    'last_page' => ceil($total / $perPage),
+                    'data' => $paginatedData,
+                ],
+            ], 200);
+        
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ], 400);
+        
+            throw new HttpResponseException($response);
+        }
+        
+    }
+
+    public function generate_schdule(Request $request){
         try {
 
             $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -606,56 +593,7 @@ class ProcessLoan extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
 
-            $sql = DB::connection('coops')->select("Call USP_LOAN_SEARCH_ACCOUNT(?,?,?);",[$request->member_name,$request->member_no,$request->mode]);
-
-            if (empty($sql)) {
-                // Custom validation for no data found
-                return response()->json([
-                    'message' => 'No Data Found',
-                    'details' => [],
-                ], 200);
-            }
-           
-            return response()->json([
-                    'message' => 'Success',
-                    'details' => $sql,
-                ],200);
-            
-            
-        } catch (Exception $ex) {
-            $response = response()->json([
-                'message' => 'Error Found',
-                'details' => $ex->getMessage(),
-            ],400);
-
-            throw new HttpResponseException($response);
-        }
-    }
-    else{
-        $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-    } 
-    }
-
-    public function generate_schdule(Int $org_id, String $acct_id, Int $mode){
-        try {
-
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
-            if(!$sql){
-              throw new Exception;
-            }
-            $org_schema = $sql[0]->db;
-            $db = Config::get('database.connections.mysql');
-            $db['database'] = $org_schema;
-            config()->set('database.connections.coops', $db);
-
-            $sql = DB::connection('coops')->select("Call USP_LOAN_SCHDULE_DATA(?,?);",[$acct_id,$mode]);
+            $sql = DB::connection('coops')->select("Call USP_LOAN_SCHDULE_DATA(?,?);",[$request->acct_id,$request->mode]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -681,13 +619,6 @@ class ProcessLoan extends Controller
     }
 
     public function get_dep_share_balance(Request $request){
-        $validator = Validator::make($request->all(),[
-            'org_id' => 'required',
-            'prod_id' => 'required',
-            'mem_id' => 'required',
-            'date' => 'required'
-        ]);
-        if($validator->passes()){
         try {
 
             $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -723,28 +654,8 @@ class ProcessLoan extends Controller
             throw new HttpResponseException($response);
         }
     }
-    else{
-        $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-    } 
-    }
 
     public function get_disb_cal_amount(Request $request){
-        $validator = Validator::make($request->all(),[
-            'org_id' => 'required',
-            'mem_id' => 'required',
-            'share_bal' => 'required',
-            'prod_id' => 'required',
-            'disb_amount' => 'required',
-            'date' => 'required'
-        ]);
-        if($validator->passes()){
         try {
 
             $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -780,17 +691,6 @@ class ProcessLoan extends Controller
             throw new HttpResponseException($response);
         }
     }
-    else{
-        $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-    }  
-    }
     public function process_loan_disburse(Request $request){
         $validator = Validator::make($request->all(),[
             'org_id' => 'required',
@@ -799,10 +699,6 @@ class ProcessLoan extends Controller
             'act_id' => 'required',
             'mem_id' => 'required',
             'disb_amt' => 'required',
-            'share_amt' => 'required',
-            'dep_amt' => 'required',
-            'ins_amt' => 'required',
-            'mis_amt' => 'required',
             'fin_id' => 'required',
             'branch_Id' => 'required'
         ]);
@@ -820,7 +716,7 @@ class ProcessLoan extends Controller
 
             DB::connection('coops')->beginTransaction();
 
-            $cash_drop_table = DB::connection('coops')->statement("Drop Temporary Table If Exists tempcashnote;");
+                $cash_drop_table = DB::connection('coops')->statement("Drop Temporary Table If Exists tempcashnote;");
                 $cash_create_table = DB::connection('coops')->statement("Create Temporary Table tempcashnote
                                                     (
                                                         Denom_Id			Int,
@@ -836,14 +732,18 @@ class ProcessLoan extends Controller
                     }
                 }
 
-            $sql = DB::connection('coops')->statement("Call USP_LOAN_POST_DISBURSE(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->disb_date,$request->ref_vouch,$request->prod_id,$request->act_id,$request->mem_id,$request->share_id,$request->dep_id,$request->disb_amt,$request->share_amt,$request->dep_amt,$request->ins_amt,$request->mis_amt,$request->share_gl,$request->dep_gl,$request->mis_gl,$request->sb_id,$request->bank_id,$request->fin_id,$request->branch_Id,auth()->user()->Id]);
+            $sql = DB::connection('coops')->statement("Call USP_LOAN_POST_DISBURSE(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message,@acct_no,@mobile,@disb_date,@disb_amt);",[$request->disb_date,$request->ref_vouch,$request->prod_id,$request->act_id,$request->mem_id,$request->share_id,$request->dep_id,$request->disb_amt,$request->share_amt,$request->dep_amt,$request->ins_amt,$request->mis_amt,$request->share_gl,$request->dep_gl,$request->mis_gl,$request->sb_id,$request->bank_id,$request->fin_id,$request->branch_Id,auth()->user()->Id]);
 
             if(!$sql){
                 throw new Exception('Operation Not Complete !!');
             }
-            $result = DB::connection('coops')->select("Select @error As Error_No,@message As Message");
+            $result = DB::connection('coops')->select("Select @error As Error_No,@message As Message,@acct_no As Account,@disb_date As Date,@disb_amt As Amount,@mobile As Mobile");
             $error_No = $result[0]->Error_No;
             $message = $result[0]->Message;
+            $acct_no = $result[0]->Account;
+            $mobile = $result[0]->Mobile;
+            $disb_date = $result[0]->Date;
+            $disb_amt = $result[0]->Amount;
 
             if($error_No<0){
                 DB::connection('coops')->rollBack();
@@ -854,6 +754,9 @@ class ProcessLoan extends Controller
             }
             else{
                 DB::connection('coops')->commit();
+                if($mobile<>0 || preg_match('/^\d{10}$/', $mobile)){
+                    $this->send_on_loan_disburse($request->org_id,$acct_no,$disb_amt,$disb_date,$mobile);
+                }
                 return response()->json([
                     'message' => 'Success',
                     'details' => $message,
@@ -883,12 +786,6 @@ class ProcessLoan extends Controller
     }
 
     public function get_repay_data(Request $request){
-        $validator = Validator::make($request->all(),[
-            'org_id' => 'required',
-            'acct_no' => 'required',
-            'date' => 'required'
-        ]);
-        if($validator->passes()){
         try {
 
             $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -935,17 +832,6 @@ class ProcessLoan extends Controller
             throw new HttpResponseException($response);
         }
     }
-    else{
-        $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-    }  
-    }
 
     public function process_loan_repayment(Request $request){
         $validator = Validator::make($request->all(),[
@@ -991,14 +877,20 @@ class ProcessLoan extends Controller
                     }
                 }
 
-            $sql = DB::connection('coops')->statement("Call USP_LOAN_POST_REPAY(?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->acct_id,$request->mem_id,$request->date,$request->ref_vouch,$request->prn_amt,$request->intt_amt,$request->due_intt,$request->prn_gl,$request->intt_gl,$request->bank_id,$request->sb_id,$request->fin_id,$request->branch_Id,auth()->user()->Id]);
+            $sql = DB::connection('coops')->statement("Call USP_LOAN_POST_REPAY(?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message,@mobile,@acct,@prn,@intt,@outs,@repay_date);",[$request->acct_id,$request->mem_id,$request->date,$request->ref_vouch,$request->prn_amt,$request->intt_amt,$request->due_intt,$request->prn_gl,$request->intt_gl,$request->bank_id,$request->sb_id,$request->fin_id,$request->branch_Id,auth()->user()->Id]);
 
             if(!$sql){
                 throw new Exception('Operation Not Complete !!');
             }
-            $result = DB::connection('coops')->select("Select @error As Error_No,@message As Message");
+            $result = DB::connection('coops')->select("Select @error As Error_No,@message As Message,@mobile As Mobile,@acct As Account,@prn As Prn,@intt As Intt,@outs As Outs,@repay_date As Repay_Date;");
             $error_No = $result[0]->Error_No;
             $message = $result[0]->Message;
+            $mobile = $result[0]->Mobile;
+            $acct = $result[0]->Account;
+            $prn = $result[0]->Prn;
+            $intt = $result[0]->Intt;
+            $outs = $result[0]->Outs;
+            $repay_date = $result[0]->Repay_Date;
 
             if($error_No<0){
                 DB::connection('coops')->rollBack();
@@ -1009,6 +901,9 @@ class ProcessLoan extends Controller
             }
             else{
                 DB::connection('coops')->commit();
+                if($mobile<>0 || preg_match('/^\d{10}$/', $mobile)){
+                    $this->send_on_loan_repayment($request->org_id,$acct,$prn,$intt,$repay_date,$outs,$mobile);
+                }
                 return response()->json([
                     'message' => 'Success',
                     'details' => $message,
@@ -1038,16 +933,6 @@ class ProcessLoan extends Controller
     }
 
     public function process_ledger(Request $request){
-        $validator = Validator::make($request->all(),[
-            'Acct_Id' => 'required',
-            'form_date' => 'required',
-            'to_date' => 'required',
-            'mode' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -1084,17 +969,55 @@ class ProcessLoan extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
+    }
 
-            $errors = $validator->errors();
+    public function get_secure_prod_list(Request $request){
+        try {
+            
+            $sql = DB::select("Select Secure_Prod_Id,Max_Allowed From map_org_loan_product Where Id=?",[$request->prod_id]);
 
+            if(!$sql){
+                throw new Exception;
+            }
+            $prod_id = $sql[0]->Secure_Prod_Id;
+            $max_allow = $sql[0]->Max_Allowed;
+            if($prod_id!=null && $max_allow!=null){
+                $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+                if(!$sql){
+                  throw new Exception;
+                }
+                $org_schema = $sql[0]->db;
+                $db = Config::get('database.connections.mysql');
+                $db['database'] = $org_schema;
+                config()->set('database.connections.coops', $db);
+                $sql = DB::connection('coops')->select("Select Id,Account_No,UDF_GET_DEP_BALANCE(Id,?) As Balance From mst_deposit_account_master Where Prod_Id=? And Mem_Id=? And Is_Active=1;",[$request->date,$prod_id,$request->mem_id]);
+                if (empty($sql)) {
+                    
+                    return response()->json([
+                        'message' => 'Error Found',
+                        'details' => "No Account Found !!",
+                    ], 200);
+                }
+                return response()->json([
+                    'message' => 'Data Found',
+                    'details' => ["DropdownData" => $sql,"maxAllow" =>$max_allow]
+                ],200);
+            }
+            else{
+                return response()->json([
+                    'message' => 'Error Found',
+                    'details' => 'No Security Found'
+                ],200);
+            }
+           
+
+        } catch (Exception $ex) {
             $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
             ],400);
-        
+
             throw new HttpResponseException($response);
-        }
+        } 
     }
 }

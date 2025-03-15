@@ -88,8 +88,9 @@ class ProcessBorrowings extends Controller
         } 
     }
 
-    public function get_ledger(Int $type){
+    public function get_ledger(Request $request){
         try {
+            $type=$request->type;
             switch ($type) {
                 case 1:
                     $subHead = 5;
@@ -212,10 +213,10 @@ class ProcessBorrowings extends Controller
         }
     }
 
-    public function get_account_list(Int $org_id){
+    public function get_account_list(Request $request){
         try {
 
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
             if(!$sql){
               throw new Exception;
             }
@@ -250,14 +251,6 @@ class ProcessBorrowings extends Controller
     }
 
     public function get_account_info(Request $request){
-        $validator = Validator::make($request->all(),[
-            'borrow_id' => 'required',
-            'date' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -292,18 +285,6 @@ class ProcessBorrowings extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
 
     public function process_disburse(Request $request){
@@ -476,16 +457,6 @@ class ProcessBorrowings extends Controller
     }
 
     public function process_ledger(Request $request){
-        $validator = Validator::make($request->all(),[
-            'borrow_id' => 'required',
-            'form_date' => 'required',
-            'to_date' => 'required',
-            'mode' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -521,17 +492,5 @@ class ProcessBorrowings extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }  
     }
 }

@@ -15,10 +15,12 @@ use Session;
 use Storage;
 use DB;
 use \stdClass;
+use App\Traits\SendSMS;
 
 class ProcessDeposit extends Controller
 {
     use SpecimenUpload;
+    use SendSMS;
     public function convertToObject($array) {
         $object = new stdClass();
         foreach ($array as $key => $value) {
@@ -29,10 +31,10 @@ class ProcessDeposit extends Controller
         }
         return $object;
     }
-    public function get_org_prodtype(Int $org_id){
+    public function get_org_prodtype(Request $request){
         try {
            
-            $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Id In(Select Product_Type From mst_org_deposit_product Where Id In(Select Prod_Id From map_org_deposit_product Where Org_Id=?));",[$org_id]);
+            $sql = DB::select("Select Id,Option_Value From mst_org_product_parameater Where Id In(Select Product_Type From mst_org_deposit_product Where Id In(Select Prod_Id From map_org_deposit_product Where Org_Id=?));",[$request->org_id]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -58,10 +60,10 @@ class ProcessDeposit extends Controller
             throw new HttpResponseException($response);
         } 
     }
-    public function get_org_deposit_product(Int $org_id, Int $type_id){
+    public function get_org_deposit_product(Request $request){
         try {
            
-            $sql = DB::select("Select m.Id,m.Prd_SH_Name,p.Deposit_Type From map_org_deposit_product m join mst_org_deposit_product p on p.Id=m.Prod_Id Where m.Org_Id=? And p.Product_Type=?;",[$org_id,$type_id]);
+            $sql = DB::select("Select m.Id,m.Prd_SH_Name,p.Deposit_Type From map_org_deposit_product m join mst_org_deposit_product p on p.Id=m.Prod_Id Where m.Org_Id=? And p.Product_Type=?;",[$request->org_id,$request->type]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -209,14 +211,6 @@ class ProcessDeposit extends Controller
     }
 
     public function check_dep_amount(Request $request){
-        $validator = Validator::make($request->all(),[
-            'prod_id' => 'required',
-            'amount' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -255,30 +249,9 @@ class ProcessDeposit extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
 
     public function check_dep_duration(Request $request){
-        $validator = Validator::make($request->all(),[
-            'prod_id' => 'required',
-            'duration' => 'required',
-            'duration_unit'=> 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -317,32 +290,9 @@ class ProcessDeposit extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
 
     public function get_deposit_mature(Request $request){
-        $validator = Validator::make($request->all(),[
-            'prod_id' => 'required',
-            'duration' => 'required',
-            'duration_unit'=> 'required',
-            'amount' => 'required',
-            'roi' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -382,31 +332,9 @@ class ProcessDeposit extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
 
     public function get_dep_payout_interest(Request $request){
-        $validator = Validator::make($request->all(),[
-            'prod_id' => 'required',
-            'type_id' => 'required',
-            'amount' => 'required',
-            'roi' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -444,24 +372,12 @@ class ProcessDeposit extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
 
-    public function get_ecs_account(Int $org_id, Int $member_id){
+    public function get_ecs_account(Request $request){
         try {
 
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
             if(!$sql){
               throw new Exception;
             }
@@ -470,7 +386,7 @@ class ProcessDeposit extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
 
-            $sql = DB::connection('coops')->select("Select Id,Account_No From mst_deposit_account_master Where Prod_Type=1 And Mem_Id=?;",[$member_id]);
+            $sql = DB::connection('coops')->select("Select Id,Account_No From mst_deposit_account_master Where Prod_Type=1 And Mem_Id=?;",[$request->memb_id]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -498,8 +414,6 @@ class ProcessDeposit extends Controller
     public function process_deposit_account(Request $request){
         $validator = Validator::make($request->all(),[
             'member_id' => 'required',
-            'ref_ac_no' => 'required',
-            'ledg_folio' => 'required',
             'open_date' => 'required',
             'prod_type' => 'required',
             'dep_type' => 'required',
@@ -598,16 +512,20 @@ class ProcessDeposit extends Controller
                 $proi = $request->input('proi') === 'null' ? null : $request->input('proi');
                 $pref_vouch = $request->input('ref_vouch') === 'null' ? null : $request->input('ref_vouch');
 
-                $sql = DB::connection('coops')->statement("Call USP_ADD_DEPOSIT_ACCOUNT(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->member_id,$request->ref_ac_no,$request->ledg_folio,$request->open_date,$pref_vouch,$request->prod_type,$request->dep_type,$request->prod_id,$request->oper_mode,$proi,$request->pamount,$duration,$dur_unit,$matur_ins,$matur_date,$matur_amt,$request->nom_name,$request->nom_rel,$request->nom_add,$request->nom_age,$joint_hld1,$joint_hld2,$request->ecs_avail,$ecs_ac_id,$is_int_payout,$pay_mode,$pay_amt,$cbs_ac_no,$agent_id,$sb_id,$bank_id,$imageName,$singname,$request->branch_id,$request->fin_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_ADD_DEPOSIT_ACCOUNT(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message,@mem_name,@acct_no,@mobile,@open_date);",[$request->member_id,$request->ref_ac_no,$request->ledg_folio,$request->open_date,$pref_vouch,$request->prod_type,$request->dep_type,$request->prod_id,$request->oper_mode,$proi,$request->pamount,$duration,$dur_unit,$matur_ins,$matur_date,$matur_amt,$request->nom_name,$request->nom_rel,$request->nom_add,$request->nom_age,$joint_hld1,$joint_hld2,$request->ecs_avail,$ecs_ac_id,$is_int_payout,$pay_mode,$pay_amt,$cbs_ac_no,$agent_id,$sb_id,$bank_id,$imageName,$singname,$request->branch_id,$request->fin_id,auth()->user()->Id]);
 
 
                 if(!$sql){
                     throw new Exception('No Data Found !!');
                 }
 
-                $result = DB::connection('coops')->select("Select @error As Error_No,@message As Message");
+                $result = DB::connection('coops')->select("Select @error As Error_No,@message As Message,@mem_name As Name,@acct_no As Account,@mobile As Mobile,@open_date As Open_Date;");
                 $error_no = $result[0]->Error_No;
                 $error_message = $result[0]->Message;
+                $member_name = $result[0]->Name;
+                $acct_No = $result[0]->Account;
+                $mobile = $result[0]->Mobile;
+                $open_date = $result[0]->Open_Date;
 
                 if($error_no<0){
                     DB::connection('coops')->rollBack();
@@ -618,6 +536,9 @@ class ProcessDeposit extends Controller
                 }
                 else{
                     DB::connection('coops')->commit();
+                    if($mobile<>0 || preg_match('/^\d{10}$/', $mobile)){
+                    $this->send_deposit_account_open($request->org_id,$member_name,$acct_No,$mobile,$open_date);
+                    }
                     return response()->json([
                         'message' => 'Success',
                         'details' => $error_message,
@@ -649,15 +570,6 @@ class ProcessDeposit extends Controller
     }
 
     public function get_dep_account_data(Request $request){
-        $validator = Validator::make($request->all(),[
-            'pAcct_No' => 'required',
-            'ptype' => 'required',
-            'date' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -678,12 +590,22 @@ class ProcessDeposit extends Controller
                         'details' => "Invalid Account Entred !!",
                     ], 200);
                 }
-                    return response()->json([
-                        'message' => 'Data Found',
-                        'details' => $sql,
-                    ],200);
-                
 
+                    $error_no = $sql[0]->Error;
+                    $message = $sql[0]->Message;
+
+                    if($error_no<0){
+                        return response()->json([
+                            'message' => 'Error Found',
+                            'details' => $message,
+                        ],200);
+                    }
+                    else{
+                        return response()->json([
+                            'message' => 'Data Found',
+                            'details' => $sql,
+                        ],200);
+                    }
 
             } catch (Exception $ex) {
                 DB::connection('coops')->rollBack();
@@ -694,56 +616,62 @@ class ProcessDeposit extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
 
-    public function search_account(Int $org_id,Int $type,String $value){
+    public function search_account(Request $request){
         try {
-
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
-            if(!$sql){
-              throw new Exception;
+            $sql = DB::select("SELECT UDF_GET_ORG_SCHEMA(?) as db;", [$request->org_id]);
+            if (!$sql) {
+                throw new Exception('Database schema not found.');
             }
+        
             $org_schema = $sql[0]->db;
             $db = Config::get('database.connections.mysql');
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
-
-            $sql = DB::connection('coops')->select("Call USP_GET_MEMBER_DEP_ACCOUNT(?,?);",[$type,$value]);
-
-            if (empty($sql)) {
-                // Custom validation for no data found
+        
+            // Get pagination parameters
+            $perPage = request()->get('limit', 10); // Default limit: 10
+            $page = request()->get('page', 1); // Default page: 1
+            $offset = ($page - 1) * $perPage;
+        
+            // Fetch all results from the stored procedure
+            $results = DB::connection('coops')->select("CALL USP_GET_MEMBER_DEP_ACCOUNT(?,?);", [$request->type, $request->keyword]);
+        
+            // Convert results to a collection to handle pagination manually
+            $collection = collect($results);
+        
+            // Paginate results
+            $paginatedData = $collection->slice($offset, $perPage)->values();
+            $total = $collection->count();
+        
+            if ($paginatedData->isEmpty()) {
                 return response()->json([
                     'message' => 'No Data Found',
-                    'details' => "No Data Found",
+                    'details' => [],
                 ], 200);
             }
-           
-                return response()->json([
-                    'message' => 'Data Found',
-                    'details' => $sql,
-                ],200);
-            
-
+        
+            return response()->json([
+                'message' => 'Data Found',
+                'data' => [
+                    'current_page' => $page,
+                    'per_page' => $perPage,
+                    'total' => $total,
+                    'last_page' => ceil($total / $perPage),
+                    'data' => $paginatedData,
+                ],
+            ], 200);
+        
         } catch (Exception $ex) {
             $response = response()->json([
                 'message' => 'Error Found',
                 'details' => $ex->getMessage(),
-            ],400);
-
+            ], 400);
+        
             throw new HttpResponseException($response);
         }
+        
     }
 
     public function process_deposit_post(Request $request){
@@ -752,7 +680,6 @@ class ProcessDeposit extends Controller
             'account_id' => 'required',
             'trans_date' => 'required',
             'pamount' => 'required',
-            'fine_amt' => 'required',
             'branch_id' => 'required',
             'fin_id' => 'required',
             'org_id' => 'required'
@@ -791,16 +718,21 @@ class ProcessDeposit extends Controller
            
                 
 
-                $sql = DB::connection('coops')->statement("Call USP_ADD_DEP_RECEIPT_PAYMENT(?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->account_id,$request->member_id,$request->trans_date,$request->ref_vouch,$request->pamount,$request->fine_amt,$request->sb_id,$request->bank_id,1,$request->branch_id,$request->fin_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_ADD_DEP_RECEIPT_PAYMENT(?,?,?,?,?,?,?,?,?,?,?,?,@error,@message,@mobile,@Acct_No,@trans_date,@amount,@balance);",[$request->account_id,$request->member_id,$request->trans_date,$request->ref_vouch,$request->pamount,$request->fine_amt,$request->sb_id,$request->bank_id,1,$request->branch_id,$request->fin_id,auth()->user()->Id]);
 
 
                 if(!$sql){
                     throw new Exception('No Data Found !!');
                 }
 
-                $result = DB::connection('coops')->select("Select @error As Error_No,@message As Message");
+                $result = DB::connection('coops')->select("Select @error As Error_No,@message As Message,@Acct_No As Acct_No,@trans_date As Trans_Date,@amount As Amount,@balance As Balance,@mobile As Mobile;");
                 $error_no = $result[0]->Error_No;
                 $error_message = $result[0]->Message;
+                $mobile = $result[0]->Mobile;
+                $acct_no = $result[0]->Acct_No;
+                $trans_date = $result[0]->Trans_Date;
+                $amount = $result[0]->Amount;
+                $balance = $result[0]->Balance;
 
                 if($error_no<0){
                     DB::connection('coops')->rollBack();
@@ -811,6 +743,9 @@ class ProcessDeposit extends Controller
                 }
                 else{
                     DB::connection('coops')->commit();
+                    if($mobile<>0 || preg_match('/^\d{10}$/', $mobile)){
+                        $this->send_deposit_credit($request->org_id,$acct_no,$mobile,$trans_date,$amount,$balance);
+                    }
                     return response()->json([
                         'message' => 'Success',
                         'details' => $error_message,
@@ -884,16 +819,21 @@ class ProcessDeposit extends Controller
                 }
            
 
-                $sql = DB::connection('coops')->statement("Call USP_ADD_DEP_RECEIPT_PAYMENT(?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->account_id,$request->member_id,$request->trans_date,$request->ref_vouch,$request->pamount,0,$request->sb_id,$request->bank_id,2,$request->branch_id,$request->fin_id,auth()->user()->Id]);
+                $sql = DB::connection('coops')->statement("Call USP_ADD_DEP_RECEIPT_PAYMENT(?,?,?,?,?,?,?,?,?,?,?,?,@error,@message,@mobile,@Acct_No,@trans_date,@amount,@balance);",[$request->account_id,$request->member_id,$request->trans_date,$request->ref_vouch,$request->pamount,0,$request->sb_id,$request->bank_id,2,$request->branch_id,$request->fin_id,auth()->user()->Id]);
 
 
                 if(!$sql){
                     throw new Exception('No Data Found !!');
                 }
 
-                $result = DB::connection('coops')->select("Select @error As Error_No,@message As Message");
+                $result = DB::connection('coops')->select("Select @error As Error_No,@message As Message,@Acct_No As Acct_No,@trans_date As Trans_Date,@amount As Amount,@balance As Balance,@mobile As Mobile;");
                 $error_no = $result[0]->Error_No;
                 $error_message = $result[0]->Message;
+                $mobile = $result[0]->Mobile;
+                $acct_no = $result[0]->Acct_No;
+                $trans_date = $result[0]->Trans_Date;
+                $amount = $result[0]->Amount;
+                $balance = $result[0]->Balance;
 
                 if($error_no<0){
                     DB::connection('coops')->rollBack();
@@ -904,12 +844,14 @@ class ProcessDeposit extends Controller
                 }
                 else{
                     DB::connection('coops')->commit();
+                    if($mobile<>0 || preg_match('/^\d{10}$/', $mobile)){
+                        $this->send_deposit_account_debit($request->org_id,$acct_no,$mobile,$trans_date,$amount,$balance);
+                    }
                     return response()->json([
                         'message' => 'Success',
                         'details' => $error_message,
                     ],200);
                 }
-         
 
             } catch (Exception $ex) {
                 DB::connection('coops')->rollBack();
@@ -934,10 +876,10 @@ class ProcessDeposit extends Controller
         }
     }
 
-    public function get_specimen(Int $org_id,Int $acct_id){
+    public function get_specimen(Request $request){
         try {
 
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
             if(!$sql){
               throw new Exception;
             }
@@ -946,14 +888,17 @@ class ProcessDeposit extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
 
-            $sql = DB::connection('coops')->select("Select Image_Name,Sing_Name From mst_deposit_specimen Where Is_Active=1 And Acct_Id=?;",[$acct_id]);
+            $sql = DB::connection('coops')->select("Select Image_Name,Sing_Name From mst_deposit_specimen Where Is_Active=1 And Acct_Id=?;",[$request->acct_id]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
-                return response()->json([
-                    'message' => 'No Data Found',
-                    'details' => [],
-                ], 200);
+                $img_url = $this->getUrl($org_id,null);
+                $sing_url = $this->getUrl($org_id,null);
+                // return response()->json([
+                //     'message' => 'No Data Found',
+                //     'details' => [],
+                // ], 200);
+                return response()->json(["image_link" => $img_url,"sing_url" => $sing_url],200);
             }
 
             $image = $sql[0]->Image_Name;
@@ -975,16 +920,6 @@ class ProcessDeposit extends Controller
     }
 
     public function get_dep_intt_rate(Request $request){
-        $validator = Validator::make($request->all(),[
-            'prod_id' => 'required',
-            'duration' => 'required',
-            'dur_unit' => 'required',
-            'date' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -1023,29 +958,9 @@ class ProcessDeposit extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
 
     public function get_close_acct_Data(Request $request){
-        $validator = Validator::make($request->all(),[
-            'acct_no' => 'required',
-            'date' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -1087,29 +1002,9 @@ class ProcessDeposit extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
 
     public function get_mature_data(Request $request){
-        $validator = Validator::make($request->all(),[
-            'acct_no' => 'required',
-            'date' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -1152,18 +1047,6 @@ class ProcessDeposit extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
 
     public function process_close_account(Request $request){
@@ -1260,14 +1143,6 @@ class ProcessDeposit extends Controller
     }
 
     public function calculate_mature_interest(Request $request){
-        $validator = Validator::make($request->all(),[
-            'acct_id' => 'required',
-            'date' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -1279,7 +1154,7 @@ class ProcessDeposit extends Controller
                 $db['database'] = $org_schema;
                 config()->set('database.connections.coops', $db);
 
-                $sql = DB::connection('coops')->select("Select UDF_CAL_MATURE_INTT(?,?,?,?) As Mature_Intt;",[$request->acct_id,$request->date,0,1]);
+                $sql = DB::connection('coops')->select("Select UDF_CAL_MATURE_INTT(?,?,?,?) As Mature_Intt;",[$request->acct_id,$request->date,$request->man_roi,1]);
                 
                 if (empty($sql)) {
                 // Custom validation for no data found
@@ -1306,30 +1181,9 @@ class ProcessDeposit extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
     
     public function calculate_bonus_intt(Request $request){
-        $validator = Validator::make($request->all(),[
-            'acct_id' => 'required',
-            'date' => 'required',
-            'roi' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -1368,18 +1222,6 @@ class ProcessDeposit extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
 
     public function process_mature_account(Request $request){
@@ -1389,8 +1231,6 @@ class ProcessDeposit extends Controller
             'member_id' => 'required',
             'principal_amt' => 'required',
             'intt_amt' => 'required',
-            'bonus_amt' => 'required',
-            'bonus_rate' => 'required',
             'branch_id' => 'required',
             'fin_id' => 'required',
             'org_id' => 'required'
@@ -1561,16 +1401,6 @@ class ProcessDeposit extends Controller
     }
 
     public function get_payout_account(Request $request){
-        $validator = Validator::make($request->all(),[
-            'month' => 'required',
-            'year' => 'required',
-            'type' => 'required',
-            'mode' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -1582,13 +1412,13 @@ class ProcessDeposit extends Controller
                 $db['database'] = $org_schema;
                 config()->set('database.connections.coops', $db);
 
-                $sql = DB::connection('coops')->select("Call USP_DEP_GET_INTT_PAYOUT_DATA(?,?,?,?,?);",[$request->month,$request->year,$request->acct_no,$request->type,$request->mode]);
+                $sql = DB::connection('coops')->select("Call USP_DEP_GET_INTT_PAYOUT_DATA(?,?,?,?,?,?);",[$request->date,$request->month,$request->year,$request->acct_no,$request->type,$request->mode]);
                 
                 if (empty($sql)) {
                     // Custom validation for no data found
                     return response()->json([
                         'message' => 'No Data Found',
-                        'details' => [],
+                        'details' => "No Data Found",
                     ], 200);
                 }
 
@@ -1607,18 +1437,6 @@ class ProcessDeposit extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
 
     public function process_blkintt_payout(Request $request){
@@ -1823,14 +1641,6 @@ class ProcessDeposit extends Controller
     }
 
     public function get_account_balance(Request $request){
-        $validator = Validator::make($request->all(),[
-            'Acct_Id' => 'required',
-            'Date' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -1867,31 +1677,9 @@ class ProcessDeposit extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
 
     public function process_ledger(Request $request){
-        $validator = Validator::make($request->all(),[
-            'Acct_Id' => 'required',
-            'form_date' => 'required',
-            'to_date' => 'required',
-            'mode' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -1928,17 +1716,61 @@ class ProcessDeposit extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
+    }
 
-            $errors = $validator->errors();
-
+    public function only_savings_account(Request $request){
+        try {
+            $sql = DB::select("SELECT UDF_GET_ORG_SCHEMA(?) as db;", [$request->org_id]);
+            if (!$sql) {
+                throw new Exception('Database schema not found.');
+            }
+        
+            $org_schema = $sql[0]->db;
+            $db = Config::get('database.connections.mysql');
+            $db['database'] = $org_schema;
+            config()->set('database.connections.coops', $db);
+        
+            // Get pagination parameters
+            $perPage = request()->get('limit', 10); // Default items per page: 10
+            $page = request()->get('page', 1); // Default page: 1
+            $offset = ($page - 1) * $perPage;
+        
+            // Fetch all results from the stored procedure
+            $results = DB::connection('coops')->select("CALL USP_GET_MEMBER_DEP_ACCOUNT_SB(?,?);", [$request->type, $request->value]);
+        
+            // Convert results to a collection to handle pagination manually
+            $collection = collect($results);
+        
+            // Paginate results
+            $paginatedData = $collection->slice($offset, $perPage)->values();
+            $total = $collection->count();
+        
+            if ($paginatedData->isEmpty()) {
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'data' => [],
+                ], 200);
+            }
+        
+            return response()->json([
+                'message' => 'Data Found',
+                'data' => [
+                    'current_page' => $page,
+                    'per_page' => $perPage,
+                    'total' => $total,
+                    'last_page' => ceil($total / $perPage),
+                    'data' => $paginatedData,
+                ],
+            ], 200);
+        
+        } catch (Exception $ex) {
             $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ], 400);
         
             throw new HttpResponseException($response);
         }
+        
     }
 }

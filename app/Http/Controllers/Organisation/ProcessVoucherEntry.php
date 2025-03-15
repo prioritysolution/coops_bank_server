@@ -56,60 +56,62 @@ class ProcessVoucherEntry extends Controller
         } 
     }
 
-    public function get_sub_ledger_list(Int $org_id,Int $gl_id){
+    public function get_sub_ledger_list(Request $request){
         try {
-
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
-            if(!$sql){
-              throw new Exception;
+            // Fetch organization schema
+            $sql = DB::select("SELECT UDF_GET_ORG_SCHEMA(?) AS db;", [$request->org_id]);
+            if (!$sql) {
+                throw new Exception('Organization Schema Not Found');
             }
+        
             $org_schema = $sql[0]->db;
             $db = Config::get('database.connections.mysql');
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
-
-            $sql = DB::connection('coops')->select("Call USP_GET_SUB_LEDGER_LIST(?,?);",[$gl_id,$org_id]);
-
-            if(!$sql){
-                throw new Exception('No Data Found !!');
-            }
-
-            $error_No = $sql[0]->Id;
-            $message = $sql[0]->Full_Name;
-
-            if($error_No<0){
+        
+            // Get pagination parameters
+            $perPage = request()->get('limit', 10); // Default items per page: 10
+            $page = request()->get('page', 1); // Default page: 1
+            $offset = ($page - 1) * $perPage;
+            $searchQuery = $request->input('search');
+            $searchQuery = ($searchQuery === '' || $searchQuery === null) ? null : $searchQuery;
+        
+            // Execute stored procedure
+            $results = DB::connection('coops')->select("CALL USP_GET_SUB_LEDGER_LIST(?, ?, ?);", [$request->gl_id, $request->org_id, $searchQuery]);
+        
+            // Convert results to a collection for manual pagination
+            $collection = collect($results);
+            $paginatedData = $collection->slice($offset, $perPage)->values();
+            $total = $collection->count();
+        
+            if ($paginatedData->isEmpty()) {
                 return response()->json([
-                    'message' => 'Error Found',
-                    'details' => $message,
-                ],200);
+                    'message' => 'No Data Found',
+                    'data' => [],
+                ], 200);
             }
-            else{
-                return response()->json([
-                    'message' => 'Data Found',
-                    'details' => $sql,
-                ],200);
-            }
-
+        
+            return response()->json([
+                'message' => 'Data Found',
+                'data' => [
+                    'current_page' => $page,
+                    'per_page' => $perPage,
+                    'total' => $total,
+                    'last_page' => ceil($total / $perPage),
+                    'data' => $paginatedData,
+                ],
+            ], 200);
         } catch (Exception $ex) {
             $response = response()->json([
                 'message' => 'Error Found',
                 'details' => $ex->getMessage(),
-            ],400);
-
+            ], 400);
+        
             throw new HttpResponseException($response);
         }
     }
 
     public function get_subledger_balance(Request $request){
-        $validator = Validator::make($request->all(),[
-            'subgl_id' => 'required',
-            'type' => 'required',
-            'date' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -138,18 +140,6 @@ class ProcessVoucherEntry extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
 
     public function process_voucher_posting(Request $request){

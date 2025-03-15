@@ -17,14 +17,6 @@ use DB;
 class ProcessFinancialReport extends Controller
 {
     public function process_gl_balancing(Request $request){
-        $validator = Validator::make($request->all(),[
-            'branch_id' => 'required',
-            'date' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -73,30 +65,9 @@ class ProcessFinancialReport extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
 
     public function process_daybook(Request $request){
-        $validator = Validator::make($request->all(),[
-            'branch_id' => 'required',
-            'date' => 'required',
-            'mode' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -133,30 +104,9 @@ class ProcessFinancialReport extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
 
     public function process_cash_balance(Request $request){
-        $validator = Validator::make($request->all(),[
-            'branch_id' => 'required',
-            'date' => 'required',
-            'to_date' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -193,31 +143,9 @@ class ProcessFinancialReport extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
 
     public function process_cash_acct(Request $request){
-        $validator = Validator::make($request->all(),[
-            'branch_id' => 'required',
-            'form_date' => 'required',
-            'to_date' => 'required',
-            'mode' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -254,30 +182,9 @@ class ProcessFinancialReport extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
 
     public function process_cash_book(Request $request){
-        $validator = Validator::make($request->all(),[
-            'branch_id' => 'required',
-            'date' => 'required',
-            'mode' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -314,18 +221,6 @@ class ProcessFinancialReport extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
 
     public function get_acct_ledger(){
@@ -359,16 +254,6 @@ class ProcessFinancialReport extends Controller
     }
 
     public function genereate_ledger(Request $request){
-        $validator = Validator::make($request->all(),[
-            'branch_id' => 'required',
-            'form_date' => 'required',
-            'to_date' => 'required',
-            'ledger_id' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -405,86 +290,65 @@ class ProcessFinancialReport extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
 
     public function get_voucher_list(Request $request){
-        $validator = Validator::make($request->all(),[
-            'branch_id' => 'required',
-            'frm_date' => 'required',
-            'to_date'=> 'required',
-            'mode' => 'required',
-            'ledger_id' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
-            try {
-
-                $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
-                if(!$sql){
-                  throw new Exception;
-                }
-                $org_schema = $sql[0]->db;
-                $db = Config::get('database.connections.mysql');
-                $db['database'] = $org_schema;
-                config()->set('database.connections.coops', $db);
-
-                $sql = DB::connection('coops')->select("Call USP_RPT_LIST_VOUCHER(?,?,?,?,?);",[$request->ledger_id,$request->frm_date,$request->to_date,$request->branch_id,$request->mode]);
-                
-                if (empty($sql)) {
-                    // Custom validation for no data found
-                    return response()->json([
-                        'message' => 'No Data Found',
-                        'details' => [],
-                    ], 200);
-                }
-
-                    return response()->json([
-                        'message' => 'Data Found',
-                        'details' => $sql,
-                    ],200);
-                
-
-            } catch (Exception $ex) {
-                
-                $response = response()->json([
-                    'message' => 'Error Found',
-                    'details' => $ex->getMessage(),
-                ],400);
-    
-                throw new HttpResponseException($response);
+        try {
+            // Fetch organization schema
+            $sql = DB::select("SELECT UDF_GET_ORG_SCHEMA(?) AS db;", [$request->org_id]);
+            if (!$sql) {
+                throw new Exception('Database schema not found.');
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
+    
+            $org_schema = $sql[0]->db;
+            $db = Config::get('database.connections.mysql');
+            $db['database'] = $org_schema;
+            config()->set('database.connections.coops', $db);
+    
+            // Get pagination parameters
+            $perPage = max(1, intval($request->get('limit', 10))); // Default 10 items per page
+            $page = max(1, intval($request->get('page', 1))); // Default page 1
+            $offset = ($page - 1) * $perPage;
+    
+            // Fetch results from stored procedure
+            $results = DB::connection('coops')->select("CALL USP_RPT_LIST_VOUCHER(?,?,?,?,?);", [
+                $request->ledger_id, $request->frm_date, $request->to_date, $request->branch_id, $request->mode
+            ]);
+    
+            // Convert results to a collection for pagination
+            $collection = collect($results);
+    
+            // Paginate results manually
+            $paginatedData = $collection->slice($offset, $perPage)->values();
+            $total = $collection->count();
+    
+            // Return response
+            return response()->json([
+                'message' => $paginatedData->isEmpty() ? 'No Data Found' : 'Data Found',
+                'data' => [
+                    'current_page' => $page,
+                    'per_page' => $perPage,
+                    'total' => $total,
+                    'last_page' => ceil($total / $perPage),
+                    'data' => $paginatedData,
+                ],
+            ], 200);
+    
+        } catch (Exception $ex) {
+            // Handle exceptions gracefully
             $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ], 400);
+    
             throw new HttpResponseException($response);
         }
     }
 
-    public function get_voucher_details(Int $org_id,Int $txn_id){
+    public function get_voucher_details(Request $request){
         try {
 
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
             if(!$sql){
               throw new Exception;
             }
@@ -493,7 +357,7 @@ class ProcessFinancialReport extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
 
-            $sql = DB::connection('coops')->select("Call USP_GET_VOUCHER_DETAILS(?);",[$txn_id]);
+            $sql = DB::connection('coops')->select("Call USP_GET_VOUCHER_DETAILS(?);",[$request->trans_id]);
             
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -521,15 +385,6 @@ class ProcessFinancialReport extends Controller
     }
 
     public function process_trail_balance(Request $request){
-        $validator = Validator::make($request->all(),[
-            'branch_id' => 'required',
-            'frm_date' => 'required',
-            'to_date'=> 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -566,30 +421,9 @@ class ProcessFinancialReport extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
 
     public function process_pl_account(Request $request){
-        $validator = Validator::make($request->all(),[
-            'branch_id' => 'required',
-            'frm_date' => 'required',
-            'to_date'=> 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -626,29 +460,9 @@ class ProcessFinancialReport extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
 
     public function process_pl_appropriation(Request $request){
-        $validator = Validator::make($request->all(),[
-            'branch_id' => 'required',
-            'to_date'=> 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -685,29 +499,9 @@ class ProcessFinancialReport extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
 
     public function process_balancesheet(Request $request){
-        $validator = Validator::make($request->all(),[
-            'branch_id' => 'required',
-            'to_date'=> 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -744,17 +538,5 @@ class ProcessFinancialReport extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        } 
     }
 }

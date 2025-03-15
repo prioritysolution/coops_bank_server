@@ -12,9 +12,11 @@ use Exception;
 use Session;
 use DB;
 use \stdClass;
+use App\Traits\SendSMS;
 
 class ProcessMembership extends Controller
 {
+    use SendSMS;    
     public function convertToObject($array) {
         $object = new stdClass();
         foreach ($array as $key => $value) {
@@ -62,16 +64,19 @@ class ProcessMembership extends Controller
 
                 DB::connection('coops')->beginTransaction();
 
-                $sql = DB::connection('coops')->statement("Call USP_ADD_EDIT_MEMBER(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message);",[$request->member_no,$request->mem_fst_name,$request->mem_mid_name,$request->mem_lst_name,$request->mem_rela_name,$request->mem_rel_type,$request->mem_dob,$request->mem_gend,$request->mem_caste,$request->mem_relig,$request->mem_mob,$request->mem_mail,$request->mem_add,$request->mem_state,$request->mem_dist,$request->mem_block,$request->mem_village,$request->mem_police,$request->mem_post,$request->mem_unit,$request->mem_aadhar,$request->mem_voter,$request->mem_ration,$request->mem_pan,$request->fin_id,auth()->user()->Id,1]);
+                $sql = DB::connection('coops')->statement("Call USP_ADD_EDIT_MEMBER(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message,@member_name,@mem_mob,@memcode);",[null,$request->member_no,$request->mem_fst_name,$request->mem_mid_name,$request->mem_lst_name,$request->mem_rela_name,$request->mem_rel_type,$request->mem_dob,$request->mem_gend,$request->mem_caste,$request->mem_relig,$request->mem_mob,$request->mem_mail,$request->mem_add,$request->mem_state,$request->mem_dist,$request->mem_block,$request->mem_village,$request->mem_police,$request->mem_post,$request->mem_unit,$request->mem_aadhar,$request->mem_voter,$request->mem_ration,$request->mem_pan,$request->fin_id,auth()->user()->Id,1]);
 
                 if(!$sql){
                     throw new Exception;
                 }
 
-                $result = DB::connection('coops')->select("Select @error As Error_No,@message As Message");
+                $result = DB::connection('coops')->select("Select @error As Error_No,@message As Message,@member_name As Name,@mem_mob As Mobile,@memcode As Code;");
                 $error_no = $result[0]->Error_No;
                 $error_message = $result[0]->Message;
-
+                $member_name = $result[0]->Name;
+                $mem_mob = $result[0]->Mobile;
+                $mem_code = $result[0]->Code;
+ 
                 if($error_no<0){
                     DB::connection('coops')->rollBack();
                     return response()->json([
@@ -81,6 +86,10 @@ class ProcessMembership extends Controller
                 }
                 else{
                     DB::connection('coops')->commit();
+                    if($mem_mob<>0 || preg_match('/^\d{10}$/', $mem_mob)){
+                        $this->send_welcome_member($request->org_id,$member_name,$mem_code,$mem_mob);
+                    }
+                    
                     return response()->json([
                         'message' => 'Success',
                         'details' => $error_message,
@@ -111,10 +120,10 @@ class ProcessMembership extends Controller
         }
     }
 
-    public function get_member_data(Int $org_id, Int $member_no){
+    public function get_member_update(Request $request){
         try {
 
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
             if(!$sql){
               throw new Exception;
             }
@@ -123,7 +132,142 @@ class ProcessMembership extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
 
-            $sql = DB::connection('coops')->select("Call USP_GET_GLOBAL_MEM_DET(?);",[$member_no]);
+            $sql = DB::connection('coops')->select("Call USP_GET_MEMBER_UPDATE_DATA(?);",[$request->mem_no]);
+
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
+
+            $error = $sql[0]->Error_No;
+            $message = $sql[0]->Message;
+
+            if($error<0){
+                return response()->json([
+                    'message' => 'Error Found',
+                    'details' => $message,
+                ],200);
+            }
+            else{
+                return response()->json([
+                    'message' => 'Data Found',
+                    'details' => $sql,
+                ],200);
+            }
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
+
+    public function process_update_profile(Request $request){
+        $validator = Validator::make($request->all(),[
+            'mem_id' => 'required',
+            'mem_fst_name' => 'required',
+            'mem_lst_name' => 'required',
+            'mem_rela_name' => 'required',
+            'mem_rel_type' => 'required',
+            'mem_dob' => 'required',
+            'mem_gend' => 'required',
+            'mem_caste' => 'required',
+            'mem_relig' => 'required',
+            'mem_add' => 'required',
+            'mem_state' => 'required',
+            'mem_dist' => 'required',
+            'mem_block' => 'required',
+            'mem_village' => 'required',
+            'mem_police' => 'required',
+            'mem_post' => 'required',
+            'fin_id' => 'required',
+            'org_id' => 'required'
+        ]);
+
+        if($validator->passes()){
+
+            try {
+
+                $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+                if(!$sql){
+                  throw new Exception;
+                }
+                $org_schema = $sql[0]->db;
+                $db = Config::get('database.connections.mysql');
+                $db['database'] = $org_schema;
+                config()->set('database.connections.coops', $db);
+
+                DB::connection('coops')->beginTransaction();
+
+                $sql = DB::connection('coops')->statement("Call USP_ADD_EDIT_MEMBER(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,@error,@message,@member_name,@mem_mob,@memcode);",[$request->mem_id,$request->member_no,$request->mem_fst_name,$request->mem_mid_name,$request->mem_lst_name,$request->mem_rela_name,$request->mem_rel_type,$request->mem_dob,$request->mem_gend,$request->mem_caste,$request->mem_relig,$request->mem_mob,$request->mem_mail,$request->mem_add,$request->mem_state,$request->mem_dist,$request->mem_block,$request->mem_village,$request->mem_police,$request->mem_post,$request->mem_unit,$request->mem_aadhar,$request->mem_voter,$request->mem_ration,$request->mem_pan,$request->fin_id,auth()->user()->Id,2]);
+
+                if(!$sql){
+                    throw new Exception;
+                }
+
+                $result = DB::connection('coops')->select("Select @error As Error_No,@message As Message;");
+                $error_no = $result[0]->Error_No;
+                $error_message = $result[0]->Message;
+ 
+                if($error_no<0){
+                    DB::connection('coops')->rollBack();
+                    return response()->json([
+                        'message' => 'Error Found',
+                        'details' => $error_message,
+                    ],200);
+                }
+                else{
+                    DB::connection('coops')->commit();
+
+                    return response()->json([
+                        'message' => 'Success',
+                        'details' => 'Member Profile Successfully Updated !!',
+                    ],200);
+                }
+
+
+            } catch (Exception $ex) {
+                DB::connection('coops')->rollBack();
+                $response = response()->json([
+                    'message' => 'Error Found',
+                    'details' => $ex->getMessage(),
+                ],400);
+    
+                throw new HttpResponseException($response);
+            }
+        }
+        else{
+
+            $errors = $validator->errors();
+
+            $response = response()->json([
+                'message' => 'Invalid data send',
+                'details' => $errors->messages(),
+            ],400);
+        
+            throw new HttpResponseException($response);
+        }
+    }
+
+    public function get_member_data(Request $request){
+        try {
+
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+            if(!$sql){
+              throw new Exception;
+            }
+            $org_schema = $sql[0]->db;
+            $db = Config::get('database.connections.mysql');
+            $db['database'] = $org_schema;
+            config()->set('database.connections.coops', $db);
+
+            $sql = DB::connection('coops')->select("Call USP_GET_GLOBAL_MEM_DET(?);",[$request->mem_no]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -159,10 +303,10 @@ class ProcessMembership extends Controller
         }
     }
 
-    public function get_membership_member_data(Int $org_id, Int $member_no){
+    public function get_membership_member_data(Request $request){
         try {
 
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
             if(!$sql){
               throw new Exception;
             }
@@ -171,7 +315,7 @@ class ProcessMembership extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
 
-            $sql = DB::connection('coops')->select("Call USP_GET_MEMBERSHIP_MEM_DET(?);",[$member_no]);
+            $sql = DB::connection('coops')->select("Call USP_GET_MEMBERSHIP_MEM_DET(?);",[$request->mem_no]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -207,48 +351,65 @@ class ProcessMembership extends Controller
         }
     }
 
-    public function process_member_search(Int $org_id, String $mem_name){
+    public function process_member_search(Request $request){
         try {
-
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
-            if(!$sql){
-              throw new Exception;
+            $sql = DB::select("SELECT UDF_GET_ORG_SCHEMA(?) as db;", [$request->org_id]);
+            if (!$sql) {
+                throw new Exception('Database schema not found.');
             }
+        
             $org_schema = $sql[0]->db;
             $db = Config::get('database.connections.mysql');
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
-
-            $sql = DB::connection('coops')->select("Call USP_GLOBAL_MEMBER_SEARCH(?);",[$mem_name]);
-
-            if (empty($sql)) {
-                // Custom validation for no data found
+        
+            // Get pagination parameters
+            $perPage = request()->get('limit', 10); // Default limit: 10
+            $page = request()->get('page', 1); // Default page: 1
+            $offset = ($page - 1) * $perPage;
+        
+            // Fetch all results from the stored procedure
+            $results = DB::connection('coops')->select("CALL USP_GLOBAL_MEMBER_SEARCH(?);", [$request->keyword]);
+        
+            // Convert results to a collection to handle pagination manually
+            $collection = collect($results);
+        
+            // Paginate results
+            $paginatedData = $collection->slice($offset, $perPage)->values();
+            $total = $collection->count();
+        
+            if ($paginatedData->isEmpty()) {
                 return response()->json([
                     'message' => 'No Data Found',
                     'details' => [],
                 ], 200);
             }
-            
-                return response()->json([
-                    'message' => 'Data Found',
-                    'details' => $sql,
-                ],200);
-
-
+        
+            return response()->json([
+                'message' => 'Data Found',
+                'data' => [
+                    'current_page' => $page,
+                    'per_page' => $perPage,
+                    'total' => $total,
+                    'last_page' => ceil($total / $perPage),
+                    'data' => $paginatedData,
+                ],
+            ], 200);
+        
         } catch (Exception $ex) {
             $response = response()->json([
                 'message' => 'Error Found',
                 'details' => $ex->getMessage(),
-            ],400);
-
+            ], 400);
+        
             throw new HttpResponseException($response);
         }
     }
 
-    public function get_shprod_details(Int $org_id, Int $type_id){
+    public function get_shprod_details(Request $request){
         try {
 
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
             if(!$sql){
               throw new Exception;
             }
@@ -257,7 +418,7 @@ class ProcessMembership extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
 
-            $sql = DB::connection('coops')->select("Call USP_GET_SHPROD_DETAILS(?);",[$type_id]);
+            $sql = DB::connection('coops')->select("Call USP_GET_SHPROD_DETAILS(?);",[$request->type]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -392,12 +553,6 @@ class ProcessMembership extends Controller
     }
 
     public function get_share_details(Request $request){
-        $validator = Validator::make($request->all(),[
-            'org_id' => 'required',
-            'mem_no' => 'required',
-            'date' => 'required'
-        ]);
-        if($validator->passes()){
         try {
 
             $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -444,17 +599,6 @@ class ProcessMembership extends Controller
 
             throw new HttpResponseException($response);
         }
-    }
-    else{
-        $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-    }
     }
 
     public function process_share_issue(Request $request){
@@ -744,16 +888,6 @@ class ProcessMembership extends Controller
     }
 
     public function process_share_ledger(Request $request){
-        $validator = Validator::make($request->all(),[
-            'Acct_Id' => 'required',
-            'form_date' => 'required',
-            'to_date' => 'required',
-            'mode' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -790,30 +924,9 @@ class ProcessMembership extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
 
     public function process_member_info(Request $request){
-        $validator = Validator::make($request->all(),[
-            'mem_Id' => 'required',
-            'form_date' => 'required',
-            'to_date' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -865,18 +978,5 @@ class ProcessMembership extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }
     }
-
 }

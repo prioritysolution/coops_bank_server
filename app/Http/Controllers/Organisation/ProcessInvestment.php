@@ -120,15 +120,6 @@ class ProcessInvestment extends Controller
     }
 
     public function calculate_mature_val(Request $request){
-        $validator = Validator::make($request->all(),[
-            'org_id' => 'required',
-            'acct_type' => 'required',
-            'amount' => 'required',
-            'roi' => 'required',
-            'duration' => 'required',
-            'intt_type' => 'required'
-        ]);
-        if($validator->passes()){
         try {
 
             $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -164,24 +155,14 @@ class ProcessInvestment extends Controller
             throw new HttpResponseException($response);
         }
     }
-    else{
-        $errors = $validator->errors();
 
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-    }
-    }
-
-    public function get_invest_ledger(Int $mode){
+    public function get_invest_ledger(Request $request){
         try {
-           if($mode=1){
+            $mode=$request->mode;
+           if($mode==1){
             $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Sub_Head=14 And Is_Active=1");
            }
-           if($mode=2){
+           if($mode==2){
             $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Sub_Head =32 And Is_Active=1");
            }
             
@@ -313,10 +294,10 @@ class ProcessInvestment extends Controller
         }
     }
 
-    public function get_account_list(Int $org_id, Int $type){
+    public function get_account_list(Request $request){
         try {
 
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
             if(!$sql){
               throw new Exception;
             }
@@ -325,7 +306,7 @@ class ProcessInvestment extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
 
-            $sql = DB::connection('coops')->select("Call USP_GET_INVEST_LIST(?);",[$type]);
+            $sql = DB::connection('coops')->select("Call USP_GET_INVEST_LIST(?);",[$request->type]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -515,10 +496,10 @@ class ProcessInvestment extends Controller
         }
     }
 
-    public function get_invest_info(Int $org_id,Int $invest_id){
+    public function get_invest_info(Request $request){
         try {
 
-            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$org_id]);
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
             if(!$sql){
               throw new Exception;
             }
@@ -527,7 +508,7 @@ class ProcessInvestment extends Controller
             $db['database'] = $org_schema;
             config()->set('database.connections.coops', $db);
 
-            $sql = DB::connection('coops')->select("Select Id,Invest_Type,Acct_Type,Account_No,Open_Date,Invest_Amt,Roi,Mature_Date,Mature_Val,Prn_Gl,Intt_Gl From mst_bank_investment Where Id=? And Is_Active=1 And Close_Trans_Id is null;",[$invest_id]);
+            $sql = DB::connection('coops')->select("Select Id,Invest_Type,Acct_Type,Account_No,Open_Date,Invest_Amt,Roi,Mature_Date,Mature_Val,Prn_Gl,Intt_Gl From mst_bank_investment Where Id=? And Is_Active=1 And Close_Trans_Id is null;",[$request->invest_id]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -772,16 +753,6 @@ class ProcessInvestment extends Controller
     }
 
     public function process_ledger(Request $request){
-        $validator = Validator::make($request->all(),[
-            'invest_id' => 'required',
-            'form_date' => 'required',
-            'to_date' => 'required',
-            'mode' => 'required',
-            'org_id' => 'required'
-        ]);
-
-        if($validator->passes()){
-
             try {
 
                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
@@ -817,19 +788,5 @@ class ProcessInvestment extends Controller
     
                 throw new HttpResponseException($response);
             }
-        }
-        else{
-
-            $errors = $validator->errors();
-
-            $response = response()->json([
-                'message' => 'Invalid data send',
-                'details' => $errors->messages(),
-            ],400);
-        
-            throw new HttpResponseException($response);
-        }  
-
-    
     }
 }

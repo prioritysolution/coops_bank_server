@@ -119,10 +119,10 @@ class UserLogin extends Controller
         }
     }
 
-    public function get_current_financial_year(Int $org_id){
+    public function get_current_financial_year(Request $request){
         try {
            
-            $sql = DB::select("Select Id,Start_Dtae As Start_Date,End_Date From mst_org_financial_year Where Org_Id=? And Is_Active=?;",[$org_id,1]);
+            $sql = DB::select("Select Id,Start_Dtae As Start_Date,End_Date From mst_org_financial_year Where Org_Id=? And Is_Active=?;",[$request->org_id,1]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -149,9 +149,9 @@ class UserLogin extends Controller
         } 
     }
 
-    public function get_dashboard(Int $org_id){
+    public function get_dashboard(Request $request){
         try {
-            $result = DB::select("CALL USP_GET_ORG_USER_DASHBOARD(?, ?);", [$org_id, auth()->user()->Id]);
+            $result = DB::select("CALL USP_GET_ORG_USER_DASHBOARD(?, ?);", [$request->org_id, auth()->user()->Id]);
             
             if (empty($result)) {
                 // Custom validation for no data found
@@ -454,10 +454,10 @@ class UserLogin extends Controller
         } 
     }
 
-    public function get_org_user_list(Int $org_id){
+    public function get_org_user_list(Request $request){
         try {
            
-            $sql = DB::select("Select Id,User_Mail From mst_org_user Where User_Role<>1 And Org_Id=?",[$org_id]);
+            $sql = DB::select("Select Id,User_Mail From mst_org_user Where User_Role<>1 And Org_Id=?",[$request->org_id]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -484,12 +484,12 @@ class UserLogin extends Controller
         }
     }
 
-    public function get_org_all_user_list(Int $org_id){
+    public function get_org_all_user_list(Request $request){
         try {
            
             $sql = DB::select("Select m.Id,m.User_Name,m.User_Mail,m.User_Mob,r.Role_Name From mst_org_user m 
                                 Join org_user_role r On r.Id=m.User_Role
-                                Where m.Is_Active=1 And Org_Id=?",[$org_id]);
+                                Where m.Is_Active=1 And Org_Id=?",[$request->org_id]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -515,11 +515,11 @@ class UserLogin extends Controller
         }
     }
 
-    public function get_module_menue_list(Int $org_id){
+    public function get_module_menue_list(Request $request){
         try {
-            $module = DB::select("Select Id,Sub_Mod_Name From mst_org_sub_module Where Is_Active=1 And Id<>13 And Module_Id In(SELECT Module_Id FROM map_orgwise_module WHERE Org_Id =? And Is_Active=1) Order By Sl Asc;",[$org_id]);
+            $module = DB::select("Select Id,Sub_Mod_Name From mst_org_sub_module Where Is_Active=1 And Id<>13 And Module_Id In(SELECT Module_Id FROM map_orgwise_module WHERE Org_Id =? And Is_Active=1) Order By Sl Asc;",[$request->org_id]);
             $menue_set = [];
-            $config_check = DB::select("Select Is_Demand From mst_org_config Where Org_Id=?",[$org_id]);
+            $config_check = DB::select("Select Is_Demand From mst_org_config Where Org_Id=?",[$request->org_id]);
             foreach ($module as $module_key) {
                 if($config_check[0]->Is_Demand===0){
                     $sub_m = DB::select("Select Id,Sub_Mod_Id,Menue_Name From mst_org_module_menue Where Sub_Mod_Id=? And Is_Active=? And Id Not in (40,65) Order By Sl Asc;",[$module_key->Id,1]);
@@ -811,5 +811,62 @@ class UserLogin extends Controller
       
           throw new HttpResponseException($response);
         } 
+    }
+
+    public function process_check_year(Request $request){
+        $validator = Validator::make($request->all(),[
+            'org_id' => 'required',
+            'year_id' => 'required',
+            'branch_id' => 'required',
+        ]);
+
+        if($validator->passes()){
+
+            try {
+
+                $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+                if(!$sql){
+                  throw new Exception;
+                }
+                $org_schema = $sql[0]->db;
+                $db = Config::get('database.connections.mysql');
+                $db['database'] = $org_schema;
+                config()->set('database.connections.coops', $db);
+                DB::connection('coops')->beginTransaction();
+
+                $sql = DB::connection('coops')->statement("Call USP_CHECK_FIN(?,?);",[$request->year_id,$request->branch_id]);
+
+                if(!$sql){
+                    throw new Exception;
+                }
+
+                DB::connection('coops')->commit();
+                $response = response()->json([
+                    'message' => 'Success',
+                    'details' => 'Year Check Complete',
+                ],200);
+            }
+
+             catch (Exception $ex) {
+                DB::connection('coops')->rollBack();
+                $response = response()->json([
+                    'message' => 'Error Found',
+                    'details' => $ex->getMessage(),
+                ],400);
+    
+                throw new HttpResponseException($response);
+            }
+        }
+        else{
+
+            $errors = $validator->errors();
+
+            $response = response()->json([
+                'message' => 'Invalid data send',
+                'details' => $errors->messages(),
+            ],400);
+        
+            throw new HttpResponseException($response);
+        }
     }
 } 

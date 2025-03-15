@@ -91,14 +91,12 @@ class ProcessOpening extends Controller
             'org_id' => 'required',
             'start_date' => 'required',
             'mem_id' => 'required',
-            'ref_ac_no' => 'required',
             'open_date' => 'required',
             'prod_type' => 'required',
             'dep_type' => 'required',
             'prod_id' => 'required',
             'oper_mode' => 'required',
             'roi' => 'required',
-            'dep_amount' => 'required',
             'open_intt' => 'required',
             'open_balance' => 'required',
             'branch_Id' => 'required',
@@ -491,10 +489,10 @@ class ProcessOpening extends Controller
         }
     }
 
-    public function get_acct_sub_head(Int $head_id){
+    public function get_acct_sub_head(Request $request){
         try {
 
-            $sql = DB::select("Select Id,Sub_Head_Name From mst_org_acct_sub_head Where Is_Active=? And Head_Id=?;",[1,$head_id]);
+            $sql = DB::select("Select Id,Sub_Head_Name From mst_org_acct_sub_head Where Is_Active=? And Head_Id=?;",[1,$request->head_id]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -520,10 +518,10 @@ class ProcessOpening extends Controller
         }
     }
     
-    public function get_acct_ledger(Int $sub_id){
+    public function get_acct_ledger(Request $request){
         try {
 
-            $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=? And Sub_Head=?;",[1,$sub_id]);
+            $sql = DB::select("Select Id,Ledger_Name From mst_org_acct_ledger Where Is_Active=? And Sub_Head=?;",[1,$request->sub_head]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
@@ -615,10 +613,10 @@ class ProcessOpening extends Controller
     } 
     }
 
-    public function get_org_branch_list(Int $org_id,Int $branch_id){
+    public function get_org_branch_list(Request $request){
         try {
 
-            $sql = DB::select("Call USP_GET_ORG_BRANCH(?,?);",[$org_id,$branch_id]);
+            $sql = DB::select("Call USP_GET_ORG_BRANCH(?,?);",[$request->org_id,$request->branch_id]);
 
             if (empty($sql)) {
                 // Custom validation for no data found
