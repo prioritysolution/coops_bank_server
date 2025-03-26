@@ -79,7 +79,7 @@ class ProcessFinancialReport extends Controller
                 $db['database'] = $org_schema;
                 config()->set('database.connections.coops', $db);
 
-                $sql = DB::connection('coops')->select("Call USP_RPT_DAYBOOK(?,?,?);",[$request->branch_id,$request->date,$request->mode]);
+                $sql = DB::connection('coops')->select("Call USP_RPT_DAYBOOK(?,?);",[$request->branch_id,$request->date]);
                 
                 if (empty($sql)) {
                     // Custom validation for no data found
@@ -89,9 +89,61 @@ class ProcessFinancialReport extends Controller
                     ], 200);
                 }
 
+                $daybook_data = [];
+
+                foreach ($sql as $daybook) {
+                    if($daybook->Opening_Cash){
+                        $daybook_data['DayBook']=[
+                            'Opening_Cash' => $daybook->Opening_Cash,
+                            'Receipt_Data' => [],
+                            'Payment_Data' => [],
+                            'Closing_Cash'=>'',
+                            'Denom_Data' => [],
+                        ];
+                    }
+
+                    if($daybook->Rec_Count){
+                        $daybook_data['DayBook']['Receipt_Data'][]=[
+                            'Gl_Id' => $daybook->Gl_Id,
+                            'Vouch_No' => $daybook->Rec_Count,
+                            'Particular' => $daybook->Ledger_Name,
+                            'Cash' => $daybook->Rec_Cash,
+                            'Transfer' => $daybook->Rec_Trf,
+                            'Total' => ($daybook->Rec_Cash ?? 0) + ($daybook->Rec_Trf ?? 0)
+                        ];
+                    }
+
+                    if($daybook->Pay_Count){
+                        $daybook_data['DayBook']['Payment_Data'][]=[
+                            'Gl_Id' => $daybook->Gl_Id,
+                            'Vouch_No' => $daybook->Pay_Count,
+                            'Particular' => $daybook->Ledger_Name,
+                            'Cash' => $daybook->Pay_Cash,
+                            'Transfer' => $daybook->Pay_Trf,
+                            'Total' => ($daybook->Pay_Cash ?? 0) + ($daybook->Pay_Trf ?? 0)
+                        ];
+                    }
+
+                    if($daybook->Closing_Cash){
+                        $daybook_data['DayBook']['Closing_Cash']=$daybook->Closing_Cash;
+                    }
+
+                    if($daybook->Denom_Id){
+                        $daybook_data['DayBook']['Denom_Data'][]=[
+                            'Denom_Id' => $daybook->Denom_Id,
+                            'Denom_Label' => $daybook->Denom_Label,
+                            'Denom_Balance' => $daybook->Denom_Bal,
+                            'Denom_Value' => ($daybook->Denom_Label*$daybook->Denom_Bal)
+                        ];
+                    }
+
+                }
+
+                $daybook_data = array_values($daybook_data);
+
                     return response()->json([
                         'message' => 'Data Found',
-                        'details' => $sql,
+                        'details' => $daybook_data,
                     ],200);
                 
 
@@ -157,7 +209,7 @@ class ProcessFinancialReport extends Controller
                 $db['database'] = $org_schema;
                 config()->set('database.connections.coops', $db);
 
-                $sql = DB::connection('coops')->select("Call USP_RPT_CASH_ACCT(?,?,?,?);",[$request->branch_id,$request->form_date,$request->to_date,$request->mode]);
+                $sql = DB::connection('coops')->select("Call USP_RPT_CASH_ACCT(?,?,?);",[$request->branch_id,$request->form_date,$request->to_date]);
                 
                 if (empty($sql)) {
                     // Custom validation for no data found
@@ -167,9 +219,61 @@ class ProcessFinancialReport extends Controller
                     ], 200);
                 }
 
+                $daybook_data = [];
+
+                foreach ($sql as $daybook) {
+                    if($daybook->Opening_Cash){
+                        $daybook_data['DayBook']=[
+                            'Opening_Cash' => $daybook->Opening_Cash,
+                            'Receipt_Data' => [],
+                            'Payment_Data' => [],
+                            'Closing_Cash'=>'',
+                            'Denom_Data' => [],
+                        ];
+                    }
+
+                    if($daybook->Rec_Count){
+                        $daybook_data['DayBook']['Receipt_Data'][]=[
+                            'Gl_Id' => $daybook->Gl_Id,
+                            'Vouch_No' => $daybook->Rec_Count,
+                            'Particular' => $daybook->Ledger_Name,
+                            'Cash' => $daybook->Rec_Cash,
+                            'Transfer' => $daybook->Rec_Trf,
+                            'Total' => ($daybook->Rec_Cash ?? 0) + ($daybook->Rec_Trf ?? 0)
+                        ];
+                    }
+
+                    if($daybook->Pay_Count){
+                        $daybook_data['DayBook']['Payment_Data'][]=[
+                            'Gl_Id' => $daybook->Gl_Id,
+                            'Vouch_No' => $daybook->Pay_Count,
+                            'Particular' => $daybook->Ledger_Name,
+                            'Cash' => $daybook->Pay_Cash,
+                            'Transfer' => $daybook->Pay_Trf,
+                            'Total' => ($daybook->Pay_Cash ?? 0) + ($daybook->Pay_Trf ?? 0)
+                        ];
+                    }
+
+                    if($daybook->Closing_Cash){
+                        $daybook_data['DayBook']['Closing_Cash']=$daybook->Closing_Cash;
+                    }
+
+                    if($daybook->Denom_Id){
+                        $daybook_data['DayBook']['Denom_Data'][]=[
+                            'Denom_Id' => $daybook->Denom_Id,
+                            'Denom_Label' => $daybook->Denom_Label,
+                            'Denom_Balance' => $daybook->Denom_Bal,
+                            'Denom_Value' => ($daybook->Denom_Label*$daybook->Denom_Bal)
+                        ];
+                    }
+
+                }
+
+                $daybook_data = array_values($daybook_data);
+
                     return response()->json([
                         'message' => 'Data Found',
-                        'details' => $sql,
+                        'details' => $daybook_data,
                     ],200);
                 
 
@@ -196,7 +300,7 @@ class ProcessFinancialReport extends Controller
                 $db['database'] = $org_schema;
                 config()->set('database.connections.coops', $db);
 
-                $sql = DB::connection('coops')->select("Call USP_RPT_CASH_BOOK(?,?,?);",[$request->branch_id,$request->date,$request->mode]);
+                $sql = DB::connection('coops')->select("Call USP_RPT_CASH_BOOK(?,?);",[$request->branch_id,$request->date]);
                 
                 if (empty($sql)) {
                     // Custom validation for no data found
@@ -206,9 +310,60 @@ class ProcessFinancialReport extends Controller
                     ], 200);
                 }
 
+                $daybook_data = [];
+
+                foreach ($sql as $daybook) {
+                    if($daybook->Opening_Cash){
+                        $daybook_data['DayBook']=[
+                            'Opening_Cash' => $daybook->Opening_Cash,
+                            'Receipt_Data' => [],
+                            'Payment_Data' => [],
+                            'Closing_Cash'=>'',
+                            'Denom_Data' => [],
+                        ];
+                    }
+
+                    if($daybook->Rec_Cash){
+                        $daybook_data['DayBook']['Receipt_Data'][]=[
+                            'Trans_Id' => $daybook->Trans_Id,
+                            'Vouch_No' => $daybook->Vouch_No,
+                            'Particular' => $daybook->Particulars,
+                            'Ledger_Name' => $daybook->Ledger_Name,
+                            'Cash' => $daybook->Rec_Cash,
+                        ];
+                    }
+
+                    if($daybook->Pay_Cash){
+                        $daybook_data['DayBook']['Payment_Data'][]=[
+                            'Trans_Id' => $daybook->Trans_Id,
+                            'Vouch_No' => $daybook->Vouch_No,
+                            'Particular' => $daybook->Particulars,
+                            'Ledger_Name' => $daybook->Ledger_Name,
+                            'Cash' => $daybook->Pay_Cash,
+                           
+                        ];
+                    }
+
+                    if($daybook->Closing_Cash){
+                        $daybook_data['DayBook']['Closing_Cash']=$daybook->Closing_Cash;
+                    }
+
+                    if($daybook->Denom_Id){
+                        $daybook_data['DayBook']['Denom_Data'][]=[
+                            'Denom_Id' => $daybook->Denom_Id,
+                            'Denom_Label' => $daybook->Denom_Label,
+                            'Denom_Balance' => $daybook->Denom_Bal,
+                            'Denom_Value' => ($daybook->Denom_Label*$daybook->Denom_Bal)
+                        ];
+                    }
+
+                }
+
+                $daybook_data = array_values($daybook_data);
+
                     return response()->json([
                         'message' => 'Data Found',
-                        'details' => $sql,
+                        'details' => $daybook_data,
                     ],200);
                 
 

@@ -2004,4 +2004,133 @@ class ProcessMaster extends Controller
              throw new HttpResponseException($response);
          }
     }
+
+    public function get_active_module(Request $request){
+        try {
+
+            $sql = DB::select("Select m.Module_Id As Id,md.Module_Name From map_orgwise_module m Join mst_org_module md On md.Id=m.Module_Id Where m.Org_Id=? And m.Module_Id In(1,2,3);",[$request->org_id]);
+
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
+
+            return response()->json([
+                'message' => 'Data Found',
+                'details' => $sql,
+            ],200);
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
+
+    public function get_passbook_config(Request $request){
+        try {
+
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+            if(!$sql){
+              throw new Exception;
+            }
+            $org_schema = $sql[0]->db;
+            $db = Config::get('database.connections.mysql');
+            $db['database'] = $org_schema;
+            config()->set('database.connections.coops', $db);
+
+            $sql = DB::connection('coops')->select("Select Id,Module_Id,Page_Height,Page_Width,Fst_Page_Top,Line_No_Fst_Page,Line_No_Scnd_Page,Mid_Gap,Next_Page_Gap From mst_config_passbook Where Module_Id=?",[$request->module_id]);
+
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
+
+            return response()->json([
+                'message' => 'Data Found',
+                'details' => $sql,
+            ],200);
+
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
+
+    public function process_config_passbook(Request $request){
+        $validator = Validator::make($request->all(),[
+            'org_id' => 'required',
+            'module_id' => 'required',
+            'page_height' => 'required',
+            'page_weidth' => 'required',
+            'fst_top' => 'required',
+            'fst_page_line' => 'required',
+            'last_page_line' => 'required',
+            'mid_gap' => 'required',
+            'next_page_gap' => 'required'
+         ]);
+ 
+         if($validator->passes()){
+ 
+             try {
+ 
+                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+                 if(!$sql){
+                   throw new Exception;
+                 }
+                 $org_schema = $sql[0]->db;
+                 $db = Config::get('database.connections.mysql');
+                 $db['database'] = $org_schema;
+                 config()->set('database.connections.coops', $db);
+ 
+                 DB::connection('coops')->beginTransaction();
+
+                 $sql = DB::connection('coops')->statement("Call USP_CONFIG_PASSBOOK(?,?,?,?,?,?,?,?,?,?);",[$request->conf_id,$request->module_id,$request->page_height,$request->page_weidth,$request->fst_top,$request->fst_page_line,$request->last_page_line,$request->mid_gap,$request->next_page_gap,auth()->user()->Id]);
+ 
+                 if(!$sql){
+                     throw new Exception;
+                 }
+                
+                    DB::connection('coops')->commit();
+                    return response()->json([
+                        'message' => 'Success',
+                        'details' => 'Passbook Configured Successfully !!',
+                    ],200);
+ 
+             } catch (Exception $ex) {
+                 DB::connection('coops')->rollBack();
+                 $response = response()->json([
+                     'message' => 'Error Found',
+                     'details' => $ex->getMessage(),
+                 ],400);
+     
+                 throw new HttpResponseException($response);
+             }
+         }
+         else{
+ 
+             $errors = $validator->errors();
+ 
+             $response = response()->json([
+                 'message' => 'Invalid data send',
+                 'details' => $errors->messages(),
+             ],400);
+         
+             throw new HttpResponseException($response);
+         }
+    }
+
 }

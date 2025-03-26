@@ -22,6 +22,7 @@ use App\Http\Controllers\Organisation\ProcessOpening;
 use App\Http\Controllers\Organisation\ProcessFinancialReport;
 use App\Http\Controllers\Organisation\ProcessModuleReport;
 use App\Http\Controllers\Organisation\ProcessVoucherEntry;
+use App\Http\Controllers\Organisation\ProcessRectify;
 // user Controller end here
 
 /*
@@ -164,6 +165,9 @@ Route::group([
     Route::post('/Org/MasterSetup/AddDepositAgent',[ProcessMaster::class,'process_deposit_agent']);
     Route::get('/Org/MasterSetup/GetDepositAgent',[ProcessMaster::class,'get_deposit_agent']);
     Route::post('/Org/MasterSetup/DepositIntSlab',[ProcessMaster::class,'deposit_Intt_Slab']);
+    Route::get('/Org/MasterSetup/GetModuleActive',[ProcessMaster::class,'get_active_module']);
+    Route::get('/Org/MasterSetup/GetPassbookConfig',[ProcessMaster::class,'get_passbook_config']);
+    Route::post('/Org/MasterSetup/ConfigPassBook',[ProcessMaster::class,'process_config_passbook']);
 
     // end master route
 
@@ -181,9 +185,14 @@ Route::group([
     Route::post('/Org/MemberShip/IssueShare',[ProcessMembership::class,'process_share_issue']);
     Route::post('/Org/MemberShip/RefundShare',[ProcessMembership::class,'process_refund_share']);
     Route::post('/Org/MemberShip/WithdrwanMembership',[ProcessMembership::class,'process_withdrw_membership']);
+    Route::get('/Org/MemberShip/GetLastDivPaidDate',[ProcessMembership::class,'get_last_div_date']);
+    Route::get('/Org/MemberShip/CalculateDividend',[ProcessMembership::Class,'calculate_dividend']);
+    Route::post('/Org/MemberShip/PostDividend',[ProcessMembership::class,'process_dividend']);
 
     Route::get('/Org/MemberShip/GetShareLedger',[ProcessMembership::class,'process_share_ledger']);
     Route::get('/Org/MemberShip/GetMemberInfo',[ProcessMembership::class,'process_member_info']);
+    Route::get('/Org/MemberShip/GetPassBookPrint',[ProcessMembership::class,'process_passbook']);
+    Route::post('/Org/MemberShip/ProcessPassBookUpdate',[ProcessMembership::class,'log_last_print']);
 
     // membership route end here
 
@@ -221,6 +230,8 @@ Route::group([
     Route::get('/Org/ProcessDeposit/SearchOnlySavings',[ProcessDeposit::class,'only_savings_account']);
 
     Route::get('/Org/ProcessDeposit/GetLedger',[ProcessDeposit::class,'process_ledger']);
+    Route::get('/Org/ProcessDeposit/GetPassBookPrint',[ProcessDeposit::class,'process_passbook']);
+    Route::post('/Org/ProcessDeposit/ProcessPassBookUpdate',[ProcessDeposit::class,'log_last_print']);
 
     // Deposit Route End Here
 
@@ -247,6 +258,8 @@ Route::group([
     Route::get('/Org/ProcessLoan/CheckLoanSecurity',[ProcessLoan::class,'get_secure_prod_list']);
 
     Route::get('/Org/ProcessLoan/GetLedger',[ProcessLoan::class,'process_ledger']);
+    Route::get('/Org/ProcessLoan/GetPassBook',[ProcessLoan::class,'process_passbook']);
+    Route::post('/Org/ProcessLoan/UpdatePassBook',[ProcessLoan::class,'log_last_print']);
 
     // Loan Route End Here
 
@@ -325,6 +338,7 @@ Route::group([
     Route::get('/Org/ProcessOpening/GetLedger',[ProcessOpening::class,'get_acct_ledger']);
     Route::post('/Org/ProcessOpening/AddAcctBalance',[ProcessOpening::class,'process_acct_opn_balance']);
     Route::get('/Org/ProcessOpening/GetBranchList',[ProcessOpening::class,'get_org_branch_list']);
+    Route::post('/Org/ProcessOpening/OpnDenomBranch',[ProcessOpening::class,'process_denom_opening']);
 
     // Opening Entry Route End Here
 
@@ -398,6 +412,25 @@ Route::group([
 
     // Borrowings Module End Here
     // Modulewise Route End Here
+
+    // Rectification Route Start Here
+        
+        // Membership Start 
+
+            Route::get('/Org/ProcessRectify/Membership/GetRectifyType',[ProcessRectify::class,'get_mem_rectify_drop']);
+            Route::get('/Org/ProcessRectify/Membership/GetRectifyData',[ProcessRectify::class,'get_mem_rec_data']);
+            Route::post('/Org/ProcessRectify/Membership/ProcessRectify',[ProcessRectify::class,'process_mem_rectify']);
+
+        // Membership End
+
+        // Deposit Start
+
+            Route::get('/Org/ProcessRectify/Deposit/GetRectifyType',[ProcessRectify::class,'get_dep_rectify_type']);
+            Route::get('/Org/ProcessRectify/Deposit/GetRectifyData',[ProcessRectify::class,'get_dep_rec_data']);
+            Route::post('/Org/ProcessRectify/Deposit/ProcessRectify',[ProcessRectify::class,'process_dep_rectify']);
+
+        // Deposit End
+    // Rectification Route End Here
 });
 
 // user route end here

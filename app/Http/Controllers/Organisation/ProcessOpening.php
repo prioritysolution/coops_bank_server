@@ -14,9 +14,21 @@ use Exception;
 use Session;
 use Storage;
 use DB;
+use \stdClass;
 
 class ProcessOpening extends Controller
 {
+    public function convertToObject($array) {
+        $object = new stdClass();
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                $value = $this->convertToObject($value);
+            }
+            $object->$key = $value;
+        }
+        return $object;
+    }
+    
     public function process_opn_membership(Request $request){
         $validator = Validator::make($request->all(),[
             'org_id' => 'required',
@@ -638,6 +650,92 @@ class ProcessOpening extends Controller
                 'details' => $ex->getMessage(),
             ],400);
 
+            throw new HttpResponseException($response);
+        }
+    }
+
+    public function process_denom_opening(Request $request){
+        $validator = Validator::make($request->all(),[
+           'open_date' => 'required',
+           'branch_id' => 'required',
+           'denom_data' => 'required',
+            'org_id' => 'required'
+        ]);
+
+        if($validator->passes()){
+
+            try {
+
+                $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+                if(!$sql){
+                  throw new Exception;
+                }
+                $org_schema = $sql[0]->db;
+                $db = Config::get('database.connections.mysql');
+                $db['database'] = $org_schema;
+                config()->set('database.connections.coops', $db);
+
+                DB::connection('coops')->beginTransaction();
+
+                $cash_drop_table = DB::connection('coops')->statement("Drop Temporary Table If Exists tempdenom;");
+                $cash_create_table = DB::connection('coops')->statement("Create Temporary Table tempdenom
+                                                                        (
+                                                                            Denom_Id			Int,
+                                                                            Denom_Valu			Int
+                                                                        );");
+                if(is_array($request->denom_data)){
+                    $cash_data = $this->convertToObject($request->denom_data);
+
+                    foreach ($cash_data as $denom_data) {
+                        $meter_insert =  DB::connection('coops')->statement("Insert Into tempdenom (Denom_Id,Denom_Valu) Values (?,?);",[$denom_data->note_id,$denom_data->value]);
+                    }
+                }
+
+                $sql = DB::connection('coops')->statement("Call USP_OPN_DENOM(?,?,?,@error,@message);",[$request->open_date,$request->branch_id,auth()->user()->Id]);
+
+                if(!$sql){
+                    throw new Exception;
+                }
+
+                $result = DB::connection('coops')->select("Select @error As Error_No,@message As Message");
+                $error_no = $result[0]->Error_No;
+                $error_message = $result[0]->Message;
+
+                if($error_no<0){
+                    DB::connection('coops')->rollBack();
+                    return response()->json([
+                        'message' => 'Error Found',
+                        'details' => $error_message,
+                    ],200);
+                }
+                else{
+                    DB::connection('coops')->commit();
+                    return response()->json([
+                        'message' => 'Success',
+                        'details' => 'Denomination Is Posted Successfully !!',
+                    ],200);
+                }
+
+
+            } catch (Exception $ex) {
+                DB::connection('coops')->rollBack();
+                $response = response()->json([
+                    'message' => 'Error Found',
+                    'details' => $ex->getMessage(),
+                ],400);
+    
+                throw new HttpResponseException($response);
+            }
+        }
+        else{
+
+            $errors = $validator->errors();
+
+            $response = response()->json([
+                'message' => 'Invalid data send',
+                'details' => $errors->messages(),
+            ],400);
+        
             throw new HttpResponseException($response);
         }
     }

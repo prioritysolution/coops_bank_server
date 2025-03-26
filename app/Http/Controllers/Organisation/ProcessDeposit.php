@@ -103,7 +103,6 @@ class ProcessDeposit extends Controller
                 ], 200);
             }
 
-            
                 return response()->json([
                     'message' => 'Data Found',
                     'details' => $sql,
@@ -133,7 +132,6 @@ class ProcessDeposit extends Controller
                 ], 200);
             }
 
-            
                 return response()->json([
                     'message' => 'Data Found',
                     'details' => $sql,
@@ -1773,4 +1771,178 @@ class ProcessDeposit extends Controller
         }
         
     }
+
+    public function process_passbook(Request $request){
+        try {
+            $sql = DB::select("SELECT UDF_GET_ORG_SCHEMA(?) AS db;", [$request->org_id]);
+            if (!$sql) {
+                throw new Exception('Organization schema not found.');
+            }
+            
+            $org_schema = $sql[0]->db;
+            $db = Config::get('database.connections.mysql');
+            $db['database'] = $org_schema;
+            config()->set('database.connections.coops', $db);
+        
+            // Ensure trans_date is passed as NULL if not provided
+            $trans_date = empty($request->trans_date) ? null : $request->trans_date;
+            $trans_sl = empty($request->trans_sl) ? null : $request->trans_sl;
+        
+            $sql = DB::connection('coops')->statement(
+                "CALL USP_RPT_DEPOSIT_PASSBOOK(?,?,?,?,?,@error,@message,@param,@data);",
+                [$request->org_id, $request->account_no, $trans_date, $trans_sl, $request->mode]
+            );
+        
+            if (empty($sql)) {
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
+        
+            $result = DB::connection('coops')->select("SELECT @error AS Error_No, @message AS Message, @param AS Param, @data AS Data;");
+            $error = $result[0]->Error_No;
+            $message = $result[0]->Message;
+            $param = json_decode($result[0]->Param);
+            $data = json_decode($result[0]->Data);
+            $filter_data = [];
+            if (isset($data[0]->Organisation_Name)) {
+                
+                if ($data[0]->dep_type === 6) {
+                    $filter_data = array_merge($filter_data, [
+                        $data[0]->Organisation_Name,
+                        $data[0]->Branch_Name,
+                        $data[0]->Product_Name,
+                        "DEPOSITOR NAME : " . $data[0]->Member_Name,
+                        "FATHER / HUSBAND NAME : " . $data[0]->Rel_Name,
+                        "ADDRESS : " . $data[0]->Address,
+                        "MOBILE NO : " . $data[0]->Mobile_No,
+                        "ACCOUNT NO : " . $data[0]->Account_No,
+                        "CIF No : " . $data[0]->Member_Code,
+                        "OPERATION MODE : " . $data[0]->Operation_Mode,
+                        "DATE OF OPENING : " . $data[0]->Opening_Date,
+                    ]);
+                }
+        
+                if ($data[0]->dep_type === 7 || $data[0]->dep_type === 79) {
+                    $filter_data = array_merge($filter_data, [
+                        $data[0]->Organisation_Name,
+                        $data[0]->Branch_Name,
+                        $data[0]->Product_Name,
+                        "DEPOSITOR NAME : " . $data[0]->Member_Name,
+                        "FATHER / HUSBAND NAME : " . $data[0]->Rel_Name,
+                        "ADDRESS : " . $data[0]->Address,
+                        "MOBILE NO : " . $data[0]->Mobile_No,
+                        "ACCOUNT NO : " . $data[0]->Account_No,
+                        "CIF No : " . $data[0]->Member_Code,
+                        "OPERATION MODE : " . $data[0]->Operation_Mode,
+                        "DATE OF OPENING : " . $data[0]->Opening_Date,
+                        "ROI : " . $data[0]->Roi,
+                        "INSTALLMENT AMOUNT : " . $data[0]->Installment_Amount,
+                        "MATURITY DATE : " . $data[0]->Maturity_Date,
+                    ]);
+                }
+        
+                if (!empty($data[0]->Joint_Holder_1) && !empty($data[0]->Joint_Holder_2)) {
+                    $filter_data = array_merge($filter_data, [
+                        "JOINT HOLDER NAME : " . $data[0]->Joint_Holder_1,
+                        "                  : " . $data[0]->Joint_Holder_2
+                    ]);
+                } elseif (!empty($data[0]->Joint_Holder_1)) {
+                    $filter_data = array_merge($filter_data, [
+                        "JOINT HOLDER'S NAME : " . $data[0]->Joint_Holder_1
+                    ]);
+                }
+        
+                if (!empty($data[0]->Nomination)) {
+                    $filter_data = array_merge($filter_data, [
+                        "NOM. REGISTERED : " . $data[0]->Nomination
+                    ]);
+                }
+            } else {
+                $filter_data = $data;
+            }
+        
+            if ($error < 0) {
+                return response()->json([
+                    'message' => 'Error Found',
+                    'details' => $message,
+                ], 200);
+            } else {
+                return response()->json([
+                    'message' => 'Data Found',
+                    'details' => [
+                        "Parameater" => $param,
+                        "Details" => $filter_data
+                    ],
+                ], 200);
+            }
+        } catch (Exception $ex) {
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ], 400);
+        
+            throw new HttpResponseException($response);
+        }
+    }
+
+    public function log_last_print(Request $request){
+        $validator = Validator::make($request->all(),[
+            'org_id' => 'required',
+            'acct_id' => 'required',
+            'last_date' => 'required',
+            'last_line' => 'required',
+            'last_trans_sl' => 'required'
+         ]);
+    
+         if($validator->passes()){
+    
+             try {
+    
+                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+                 if(!$sql){
+                   throw new Exception;
+                 }
+                 $org_schema = $sql[0]->db;
+                 $db = Config::get('database.connections.mysql');
+                 $db['database'] = $org_schema;
+                 config()->set('database.connections.coops', $db);
+    
+                 DB::connection('coops')->beginTransaction();
+    
+                 $sql = DB::connection('coops')->statement("INSERT INTO log_module_passbook_print (Module_Id,Acct_Id,Last_Date,Last_Line,Last_Trans_Sl,Created_By) VALUES (?,?,?,?,?,?);",[2,$request->acct_id,$request->last_date,$request->last_line,$request->last_trans_sl,auth()->user()->Id]);
+    
+                 if(!$sql){
+                     throw new Exception;
+                 }
+                
+                    DB::connection('coops')->commit();
+                    return response()->json([
+                        'message' => 'Success',
+                        'details' => 'Passbook Log Successfully Created !!',
+                    ],200);
+    
+             } catch (Exception $ex) {
+                 DB::connection('coops')->rollBack();
+                 $response = response()->json([
+                     'message' => 'Error Found',
+                     'details' => $ex->getMessage(),
+                 ],400);
+     
+                 throw new HttpResponseException($response);
+             }
+         }
+         else{
+    
+             $errors = $validator->errors();
+    
+             $response = response()->json([
+                 'message' => 'Invalid data send',
+                 'details' => $errors->messages(),
+             ],400);
+         
+             throw new HttpResponseException($response);
+         }
+       }
 }

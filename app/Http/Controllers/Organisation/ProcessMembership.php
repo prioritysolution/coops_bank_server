@@ -979,4 +979,315 @@ class ProcessMembership extends Controller
                 throw new HttpResponseException($response);
             }
     }
+
+   public function process_passbook(Request $request){
+    try {
+
+        $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+        if(!$sql){
+          throw new Exception;
+        }
+        $org_schema = $sql[0]->db;
+        $db = Config::get('database.connections.mysql');
+        $db['database'] = $org_schema;
+        config()->set('database.connections.coops', $db);
+
+        $trans_date = empty($request->trans_date) ? null : $request->trans_date;
+        $trans_sl = empty($request->trans_sl) ? null : $request->trans_sl;
+
+        $sql = DB::connection('coops')->statement("Call USP_RPT_SHARE_PASSBOOK(?,?,?,?,?,@error,@message,@param,@data);",[$request->org_id,$request->member_code,$trans_date,$trans_sl,$request->mode]);
+
+        if (empty($sql)) {
+            // Custom validation for no data found
+            return response()->json([
+                'message' => 'No Data Found',
+                'details' => [],
+            ], 200);
+        }
+        
+        $result =DB::connection('coops')->select("Select @error As Error_No,@message As Message,@param As Param,@data As Data;");
+        $error = $result[0]->Error_No;
+        $message = $result[0]->Message;
+        $param = json_decode($result[0]->Param);
+        $data = json_decode($result[0]->Data);
+        $filter_data = [];
+
+        if(isset($data[0]->Organisation_Name)){
+            $filter_data=[
+                $data[0]->Organisation_Name,
+                $data[0]->Branch_Name,
+                "MEMBER CODE : ".$data[0]->Member_Code,
+                "MEMBER NAME : ".$data[0]->Member_Name,
+                "FATHER / HUSBAND NAME : ".$data[0]->Rel_Name,
+                "ADDRESS : ".$data[0]->Address,
+                "MOBILE NO : ".$data[0]->Mobile_No,
+                "ADMISSION DATE : ".$data[0]->Admission_Date,
+                "MEMBER TYPE : ".$data[0]->Member_Type
+            ];
+        }
+        else{
+            $filter_data=$data;
+        }
+
+        if($error<0){
+            return response()->json([
+                'message' => 'Error Found',
+                'details' => $message,
+            ],200); 
+        }
+        else{
+            return response()->json([
+                'message' => 'Data Found',
+                'details' => [
+                    "Parameater" => $param,
+                    "Details" => $filter_data
+                ],
+            ],200);
+        }
+
+    } catch (Exception $ex) {
+        
+        $response = response()->json([
+            'message' => 'Error Found',
+            'details' => $ex->getMessage(),
+        ],400);
+
+        throw new HttpResponseException($response);
+    }
+   }
+
+   public function log_last_print(Request $request){
+    $validator = Validator::make($request->all(),[
+        'org_id' => 'required',
+        'acct_id' => 'required',
+        'last_date' => 'required',
+        'last_line' => 'required',
+        'last_trans_sl' => 'required'
+     ]);
+
+     if($validator->passes()){
+
+         try {
+
+             $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+             if(!$sql){
+               throw new Exception;
+             }
+             $org_schema = $sql[0]->db;
+             $db = Config::get('database.connections.mysql');
+             $db['database'] = $org_schema;
+             config()->set('database.connections.coops', $db);
+
+             DB::connection('coops')->beginTransaction();
+
+             $sql = DB::connection('coops')->statement("INSERT INTO log_module_passbook_print (Module_Id,Acct_Id,Last_Date,Last_Line,Last_Trans_Sl,Created_By) VALUES (?,?,?,?,?,?);",[1,$request->acct_id,$request->last_date,$request->last_line,$request->last_trans_sl,auth()->user()->Id]);
+
+             if(!$sql){
+                 throw new Exception;
+             }
+            
+                DB::connection('coops')->commit();
+                return response()->json([
+                    'message' => 'Success',
+                    'details' => 'Passbook Log Successfully Created !!',
+                ],200);
+
+         } catch (Exception $ex) {
+             DB::connection('coops')->rollBack();
+             $response = response()->json([
+                 'message' => 'Error Found',
+                 'details' => $ex->getMessage(),
+             ],400);
+ 
+             throw new HttpResponseException($response);
+         }
+     }
+     else{
+
+         $errors = $validator->errors();
+
+         $response = response()->json([
+             'message' => 'Invalid data send',
+             'details' => $errors->messages(),
+         ],400);
+     
+         throw new HttpResponseException($response);
+     }
+   }
+
+   public function get_last_div_date(Request $request){
+    try {
+
+        $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+        if(!$sql){
+          throw new Exception;
+        }
+        $org_schema = $sql[0]->db;
+        $db = Config::get('database.connections.mysql');
+        $db['database'] = $org_schema;
+        config()->set('database.connections.coops', $db);
+
+        $sql = DB::connection('coops')->select("Select DATE_ADD(Cal_Upto,INTERVAL 1 DAY) As Date From log_dividend_paid Order By Id Desc Limit 0,1");
+
+        if (empty($sql)) {
+            // Custom validation for no data found
+            return response()->json([
+                'message' => 'No Data Found',
+                'details' => [],
+            ], 200);
+        }
+            return response()->json([
+                'message' => 'Data Found',
+                'details' => $sql,
+            ],200);
+
+    } catch (Exception $ex) {
+        
+        $response = response()->json([
+            'message' => 'Error Found',
+            'details' => $ex->getMessage(),
+        ],400);
+
+        throw new HttpResponseException($response);
+    }
+   }
+
+   public function calculate_dividend(Request $request){
+    try {
+
+        $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+        if(!$sql){
+          throw new Exception;
+        }
+        $org_schema = $sql[0]->db;
+        $db = Config::get('database.connections.mysql');
+        $db['database'] = $org_schema;
+        config()->set('database.connections.coops', $db);
+
+        $sql = DB::connection('coops')->statement("Call USP_GET_DIVIDEND_LIST(?,?,?,@error,@message,@data);",[$request->frm_date,$request->to_date,$request->rate]);
+
+        if (empty($sql)) {
+            // Custom validation for no data found
+            return response()->json([
+                'message' => 'No Data Found',
+                'details' => [],
+            ], 200);
+        }
+
+        $result = DB::connection('coops')->select("Select @error As Error,@message As Message,@data As Data;");
+        $error_No = $result[0]->Error;
+        $message = $result[0]->Message;
+        $data = json_decode($result[0]->Data);
+
+        if($error_No<0){
+            return response()->json([
+                'message' => 'Error Found',
+                'details' => $message,
+            ],200);
+        }
+        else{
+            return response()->json([
+                'message' => 'Data Found',
+                'details' => $data,
+            ],200);
+        }
+            
+
+    } catch (Exception $ex) {
+        
+        $response = response()->json([
+            'message' => 'Error Found',
+            'details' => $ex->getMessage(),
+        ],400);
+
+        throw new HttpResponseException($response);
+    }
+   }
+
+   public function process_dividend(Request $request){
+    $validator = Validator::make($request->all(),[
+        'trans_date' => 'required',
+        'from_date' => 'required',
+        'to_date' => 'required',
+        'branch_id' => 'required',
+        'div_array' => 'required',
+        'org_id' => 'required'
+    ]);
+
+    if($validator->passes()){
+
+        try {
+
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+            if(!$sql){
+              throw new Exception;
+            }
+            $org_schema = $sql[0]->db;
+            $db = Config::get('database.connections.mysql');
+            $db['database'] = $org_schema;
+            config()->set('database.connections.coops', $db);
+
+            DB::connection('coops')->beginTransaction();
+
+            $cash_drop_table = DB::connection('coops')->statement("Drop Temporary Table If Exists tempdividend;");
+            $cash_create_table = DB::connection('coops')->statement("Create Temporary Table tempdividend
+                                                                    (
+                                                                        Mem_Id			Int,
+                                                                        Div_Amt			Numeric(18,2)
+                                                                    );");
+            if(is_array($request->div_array)){
+                $cash_data = $this->convertToObject($request->div_array);
+
+                foreach ($cash_data as $denom_data) {
+                    $meter_insert =  DB::connection('coops')->statement("Insert Into tempdividend (Mem_Id,Div_Amt) Values (?,?);",[$denom_data->member_id,$denom_data->dividend]);
+                }
+            }
+
+            $sql = DB::connection('coops')->statement("Call USP_POST_DIVIDEND_PAYABLE(?,?,?,?,?,@error,@message);",[$request->trans_date,$request->from_date,$request->to_date,$request->branch_id,auth()->user()->Id]);
+
+            if(!$sql){
+                throw new Exception;
+            }
+
+            $result = DB::connection('coops')->select("Select @error As Error_No,@message As Message");
+            $error_no = $result[0]->Error_No;
+            $error_message = $result[0]->Message;
+
+            if($error_no<0){
+                DB::connection('coops')->rollBack();
+                return response()->json([
+                    'message' => 'Error Found',
+                    'details' => $error_message,
+                ],200);
+            }
+            else{
+                DB::connection('coops')->commit();
+                return response()->json([
+                    'message' => 'Success',
+                    'details' => $error_message,
+                ],200);
+            }
+
+        } catch (Exception $ex) {
+            DB::connection('coops')->rollBack();
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+
+            throw new HttpResponseException($response);
+        }
+    }
+    else{
+
+        $errors = $validator->errors();
+
+        $response = response()->json([
+            'message' => 'Invalid data send',
+            'details' => $errors->messages(),
+        ],400);
+    
+        throw new HttpResponseException($response);
+    }
+   }
 }

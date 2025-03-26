@@ -599,7 +599,7 @@ class ProcessLoan extends Controller
                 // Custom validation for no data found
                 return response()->json([
                     'message' => 'No Data Found',
-                    'details' => [],
+                    'details' => 'Invalid Account No Entred !!',
                 ], 200);
             }
 
@@ -1020,4 +1020,144 @@ class ProcessLoan extends Controller
             throw new HttpResponseException($response);
         } 
     }
+
+    public function process_passbook(Request $request){
+        try {
+
+            $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+            if(!$sql){
+              throw new Exception;
+            }
+            $org_schema = $sql[0]->db;
+            $db = Config::get('database.connections.mysql');
+            $db['database'] = $org_schema;
+            config()->set('database.connections.coops', $db);
+    
+            $trans_date = empty($request->trans_date) ? null : $request->trans_date;
+            $trans_sl = empty($request->trans_sl) ? null : $request->trans_sl;
+    
+            $sql = DB::connection('coops')->statement("Call USP_RPT_LOAN_PASSBOOK(?,?,?,?,?,@error,@message,@param,@data);",[$request->org_id,$request->account_no,$trans_date,$trans_sl,$request->mode]);
+    
+            if (empty($sql)) {
+                // Custom validation for no data found
+                return response()->json([
+                    'message' => 'No Data Found',
+                    'details' => [],
+                ], 200);
+            }
+            
+            $result =DB::connection('coops')->select("Select @error As Error_No,@message As Message,@param As Param,@data As Data;");
+            $error = $result[0]->Error_No;
+            $message = $result[0]->Message;
+            $param = json_decode($result[0]->Param);
+            $data = json_decode($result[0]->Data);
+            $filter_data = [];
+    
+            if(isset($data[0]->Organisation_Name)){
+                $filter_data=[
+                    $data[0]->Organisation_Name,
+                    $data[0]->Branch_Name,
+                    $data[0]->Product_Name,
+                    "MEMBER CODE : ".$data[0]->Member_Code,
+                    "MEMBER NAME : ".$data[0]->Member_Name,
+                    "FATHER / HUSBAND NAME : ".$data[0]->Rel_Name,
+                    "ADDRESS : ".$data[0]->Address,
+                    "MOBILE NO : ".$data[0]->Mobile_No,
+                    "ACCOUNT NO. : ".$data[0]->Account_No,
+                    "DISBURSE DATE : ".$data[0]->Opening_Date,
+                    "ROI : ".$data[0]->Roi,
+                    "DURATION : ".$data[0]->Duration,
+                    "REPAY MODE : ".$data[0]->Repay_Mode,
+                    "REPAY WITHIN : ".$data[0]->Repay_Within
+                ];
+            }
+            else{
+                $filter_data=$data;
+            }
+    
+            if($error<0){
+                return response()->json([
+                    'message' => 'Error Found',
+                    'details' => $message,
+                ],200); 
+            }
+            else{
+                return response()->json([
+                    'message' => 'Data Found',
+                    'details' => [
+                        "Parameater" => $param,
+                        "Details" => $filter_data
+                    ],
+                ],200);
+            }
+    
+        } catch (Exception $ex) {
+            
+            $response = response()->json([
+                'message' => 'Error Found',
+                'details' => $ex->getMessage(),
+            ],400);
+    
+            throw new HttpResponseException($response);
+        }
+    }
+
+    public function log_last_print(Request $request){
+        $validator = Validator::make($request->all(),[
+            'org_id' => 'required',
+            'acct_id' => 'required',
+            'last_date' => 'required',
+            'last_line' => 'required',
+            'last_trans_sl' => 'required'
+         ]);
+    
+         if($validator->passes()){
+    
+             try {
+    
+                 $sql = DB::select("Select UDF_GET_ORG_SCHEMA(?) as db;",[$request->org_id]);
+                 if(!$sql){
+                   throw new Exception;
+                 }
+                 $org_schema = $sql[0]->db;
+                 $db = Config::get('database.connections.mysql');
+                 $db['database'] = $org_schema;
+                 config()->set('database.connections.coops', $db);
+    
+                 DB::connection('coops')->beginTransaction();
+    
+                 $sql = DB::connection('coops')->statement("INSERT INTO log_module_passbook_print (Module_Id,Acct_Id,Last_Date,Last_Line,Last_Trans_Sl,Created_By) VALUES (?,?,?,?,?,?);",[3,$request->acct_id,$request->last_date,$request->last_line,$request->last_trans_sl,auth()->user()->Id]);
+    
+                 if(!$sql){
+                     throw new Exception;
+                 }
+                
+                    DB::connection('coops')->commit();
+                    return response()->json([
+                        'message' => 'Success',
+                        'details' => 'Passbook Log Successfully Created !!',
+                    ],200);
+    
+             } catch (Exception $ex) {
+                 DB::connection('coops')->rollBack();
+                 $response = response()->json([
+                     'message' => 'Error Found',
+                     'details' => $ex->getMessage(),
+                 ],400);
+     
+                 throw new HttpResponseException($response);
+             }
+         }
+         else{
+    
+             $errors = $validator->errors();
+    
+             $response = response()->json([
+                 'message' => 'Invalid data send',
+                 'details' => $errors->messages(),
+             ],400);
+         
+             throw new HttpResponseException($response);
+         }
+       }
 }
